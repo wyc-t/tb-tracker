@@ -90,7 +90,14 @@
             <option value="5">Week 5</option><option value="6">Week 6</option>
           </select>
         </label>
+        <label id="strDayLabel" class="hidden">Session Day
+          <select id="strDay">
+            <option value="A">Day A</option>
+            <option value="B">Day B</option>
+          </select>
+        </label>
         <div id="strSuggestion" class="suggestion hidden"></div>
+        <button type="button" id="strAutoFillBtn" class="btn-accent">Load Today's Program</button>
         <div id="strExercises"></div>
         <button type="button" id="addExerciseBtn" class="btn-secondary">+ Add Exercise</button>
         <label>Notes
@@ -110,23 +117,72 @@
           <select id="runType">
             <option>Easy</option><option>LISS</option><option>HIIT</option>
             <option>Threshold</option><option>Long</option>
+            <option>Tempo</option><option>Intervals</option><option>Fartlek</option>
           </select>
         </label>
-        <label>Distance (km)
-          <input type="number" id="runDist" step="0.1" min="0" inputmode="decimal">
-        </label>
-        <label>Duration (min)
-          <input type="number" id="runDur" step="1" min="0" inputmode="numeric">
-        </label>
-        <label>Avg HR (optional)
-          <input type="number" id="runHR" step="1" min="0" inputmode="numeric">
-        </label>
+
+        <!-- Mode toggle -->
+        <div class="run-mode-toggle">
+          <button type="button" class="run-mode-btn active" data-mode="general">General</button>
+          <button type="button" class="run-mode-btn" data-mode="program">Program</button>
+        </div>
+
+        <!-- GENERAL MODE -->
+        <div id="runGeneral" class="run-mode active">
+          <label>Distance (km)
+            <input type="number" id="runDist" step="0.1" min="0" inputmode="decimal">
+          </label>
+          <label>Duration (min)
+            <input type="number" id="runDur" step="1" min="0" inputmode="numeric">
+          </label>
+          <label>Avg HR (optional)
+            <input type="number" id="runHR" step="1" min="0" inputmode="numeric">
+          </label>
+        </div>
+
+        <!-- PROGRAM MODE -->
+        <div id="runProgram" class="run-mode">
+          <div id="runSetGroups"></div>
+          <button type="button" id="addRunSetGroup" class="btn-secondary">+ Add Set Type</button>
+          <label style="margin-top:.5rem">Total Duration (min, optional)
+            <input type="number" id="runProgDur" step="1" min="0" inputmode="numeric">
+          </label>
+          <label>Avg HR (optional)
+            <input type="number" id="runProgHR" step="1" min="0" inputmode="numeric">
+          </label>
+        </div>
+
         <label>Notes
           <textarea id="runNotes" rows="2"></textarea>
         </label>
         <button type="submit" class="btn-primary">Save Run</button>
       </form>
     </section>
+
+    <!-- Run set group template -->
+    <template id="tplRunSetGroup">
+      <div class="run-set-group">
+        <div class="run-set-header">
+          <span class="run-set-title">Set Type</span>
+          <button type="button" class="btn-icon btn-remove-rsg" aria-label="Remove">✕</button>
+        </div>
+        <div class="form-grid">
+          <label>Distance (m)
+            <input type="number" class="rsg-dist" step="1" min="0" inputmode="numeric" placeholder="e.g. 400">
+          </label>
+          <label>Lap Time (sec)
+            <input type="number" class="rsg-lap" step="1" min="0" inputmode="numeric" placeholder="e.g. 90">
+          </label>
+          <label>Sets
+            <input type="number" class="rsg-sets" step="1" min="1" value="1" inputmode="numeric">
+          </label>
+          <label>Rest (sec)
+            <input type="number" class="rsg-rest" step="1" min="0" inputmode="numeric" placeholder="e.g. 60">
+          </label>
+        </div>
+        <div class="rsg-summary"></div>
+      </div>
+    </template>
 
     <!-- LOG BODY -->
     <section id="viewLogBody" class="view sub-view">
@@ -239,6 +295,27 @@
           <input type="checkbox" id="blockActive" checked>
           Set as active block
         </label>
+        <div id="blockDaysSection">
+          <p class="form-hint">Session Day Exercises — choose which exercises you do on each day</p>
+          <label>Day A Exercises
+            <select id="blockDayA1"><option>Bench Press</option><option>Back Squat</option><option>Trap Bar Deadlift</option><option>Pull-up</option><option>Assisted Pull-up</option></select>
+          </label>
+          <label class="inline-label">
+            <select id="blockDayA2"><option>Back Squat</option><option>Bench Press</option><option>Trap Bar Deadlift</option><option>Pull-up</option><option>Assisted Pull-up</option></select>
+          </label>
+          <label class="inline-label">
+            <select id="blockDayA3"><option>Assisted Pull-up</option><option>Pull-up</option><option>Bench Press</option><option>Back Squat</option><option>Trap Bar Deadlift</option></select>
+          </label>
+          <label style="margin-top:.5rem">Day B Exercises
+            <select id="blockDayB1"><option>Bench Press</option><option>Back Squat</option><option>Trap Bar Deadlift</option><option>Pull-up</option><option>Assisted Pull-up</option></select>
+          </label>
+          <label class="inline-label">
+            <select id="blockDayB2"><option>Back Squat</option><option>Bench Press</option><option>Trap Bar Deadlift</option><option>Pull-up</option><option>Assisted Pull-up</option></select>
+          </label>
+          <label class="inline-label">
+            <select id="blockDayB3"><option>Trap Bar Deadlift</option><option>Bench Press</option><option>Back Squat</option><option>Pull-up</option><option>Assisted Pull-up</option></select>
+          </label>
+        </div>
         <button type="submit" class="btn-primary">Save Block</button>
       </form>
     </section>

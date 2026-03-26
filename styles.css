@@ -217,6 +217,38 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 }
 .set-reps, .set-load { flex: 1; padding: .5rem; font-size: .95rem; text-align: center; }
 
+/* ─── RUN MODE TOGGLE ─── */
+.run-mode-toggle {
+  display: flex; gap: .25rem;
+  background: var(--bg3); border-radius: 8px; padding: 3px;
+}
+.run-mode-btn {
+  flex: 1; background: none; border: none; color: var(--text2);
+  font-size: .85rem; font-weight: 600; padding: .55rem;
+  border-radius: 6px; cursor: pointer; transition: all .15s;
+}
+.run-mode-btn.active { background: var(--accent); color: #0a0a0f; }
+.run-mode { display: none; }
+.run-mode.active { display: block; }
+
+/* ─── RUN SET GROUP ─── */
+.run-set-group {
+  background: var(--bg3); border: 1px solid var(--border);
+  border-radius: var(--radius); padding: .75rem; margin-bottom: .5rem;
+}
+.run-set-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: .5rem;
+}
+.run-set-title {
+  font-size: .75rem; font-weight: 700; color: var(--accent);
+  text-transform: uppercase; letter-spacing: .04em;
+}
+.rsg-summary {
+  font-size: .75rem; color: var(--text2); margin-top: .4rem;
+  line-height: 1.4; min-height: 1em;
+}
+
 /* ─── SUGGESTION BOX ─── */
 .suggestion {
   background: var(--bg3); border-left: 3px solid var(--accent);
@@ -299,6 +331,14 @@ canvas { width: 100% !important; max-height: 250px; margin-bottom: .5rem; }
   text-align: center; color: var(--text2); padding: 2rem 1rem;
   font-size: .9rem;
 }
+.btn-accent {
+  background: var(--bg3); border: 2px solid var(--accent); color: var(--accent);
+  border-radius: 8px; padding: .7rem; font-size: .9rem;
+  font-weight: 700; cursor: pointer; letter-spacing: .02em;
+  transition: background .15s;
+}
+.btn-accent:active { background: var(--surface); }
+.inline-label { margin-top: .15rem !important; }
 
 /* iOS scroll rubber-band fix */
 @supports (padding-top: env(safe-area-inset-top)) {
