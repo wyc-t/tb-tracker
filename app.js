@@ -82,7 +82,7 @@ const TB = {
       ]
     }
   },
-  tmFactor: 0.9,
+  tmFactor: 1.0,
   roundTo(kg) { return Math.round(kg / 2.5) * 2.5; }
 };
 
