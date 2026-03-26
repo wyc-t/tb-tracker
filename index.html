@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="theme-color" content="#0a0a0f">
+<title>TB Tracker</title>
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%230a0a0f'/><text x='256' y='340' font-size='280' font-family='system-ui' font-weight='900' fill='%23e8c547' text-anchor='middle'>TB</text></svg>">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+<!-- ═══ APP SHELL ═══ -->
+<div id="app">
+
+  <!-- ─── HEADER ─── -->
+  <header id="header">
+    <h1 id="pageTitle">Dashboard</h1>
+    <button id="headerAction" class="header-btn hidden" aria-label="Action"></button>
+  </header>
+
+  <!-- ─── VIEWS ─── -->
+  <main id="main">
+
+    <!-- DASHBOARD -->
+    <section id="viewDashboard" class="view active">
+      <div id="dashBlock" class="dash-card">
+        <span class="dash-label">Current Block</span>
+        <span id="dashBlockName" class="dash-val">—</span>
+        <span id="dashTemplate" class="dash-sub">—</span>
+      </div>
+      <div class="dash-row">
+        <div class="dash-card dash-card-sm">
+          <span class="dash-label">Last Lift</span>
+          <span id="dashLastLift" class="dash-val">—</span>
+        </div>
+        <div class="dash-card dash-card-sm">
+          <span class="dash-label">Last Run</span>
+          <span id="dashLastRun" class="dash-val">—</span>
+        </div>
+        <div class="dash-card dash-card-sm">
+          <span class="dash-label">Week km</span>
+          <span id="dashWeekKm" class="dash-val">—</span>
+        </div>
+      </div>
+      <h2 class="section-title">1RM PRs</h2>
+      <div id="dashPRs" class="pr-row"></div>
+      <h2 class="section-title">Body</h2>
+      <div id="dashBody" class="dash-card">
+        <span class="dash-val" style="font-size:1rem;opacity:.5">No measurements yet</span>
+      </div>
+      <h2 class="section-title">Recent Sessions</h2>
+      <div id="dashRecent"></div>
+    </section>
+
+    <!-- LOG MENU -->
+    <section id="viewLog" class="view">
+      <div class="log-grid">
+        <button class="log-tile" data-goto="logStrength">
+          <span class="log-icon">🏋️</span><span>Strength</span>
+        </button>
+        <button class="log-tile" data-goto="logRun">
+          <span class="log-icon">🏃</span><span>Run</span>
+        </button>
+        <button class="log-tile" data-goto="logBody">
+          <span class="log-icon">📏</span><span>Body</span>
+        </button>
+        <button class="log-tile" data-goto="logPR">
+          <span class="log-icon">🏆</span><span>1RM PR</span>
+        </button>
+      </div>
+    </section>
+
+    <!-- LOG STRENGTH -->
+    <section id="viewLogStrength" class="view sub-view">
+      <form id="formStrength" autocomplete="off">
+        <label>Block
+          <select id="strBlock"></select>
+        </label>
+        <label>Date
+          <input type="date" id="strDate">
+        </label>
+        <label>Week #
+          <select id="strWeek">
+            <option value="1">Week 1</option><option value="2">Week 2</option>
+            <option value="3">Week 3</option><option value="4">Week 4</option>
+            <option value="5">Week 5</option><option value="6">Week 6</option>
+          </select>
+        </label>
+        <div id="strSuggestion" class="suggestion hidden"></div>
+        <div id="strExercises"></div>
+        <button type="button" id="addExerciseBtn" class="btn-secondary">+ Add Exercise</button>
+        <label>Notes
+          <textarea id="strNotes" rows="2"></textarea>
+        </label>
+        <button type="submit" class="btn-primary">Save Session</button>
+      </form>
+    </section>
+
+    <!-- LOG RUN -->
+    <section id="viewLogRun" class="view sub-view">
+      <form id="formRun" autocomplete="off">
+        <label>Date
+          <input type="date" id="runDate">
+        </label>
+        <label>Type
+          <select id="runType">
+            <option>Easy</option><option>LISS</option><option>HIIT</option>
+            <option>Threshold</option><option>Long</option>
+          </select>
+        </label>
+        <label>Distance (km)
+          <input type="number" id="runDist" step="0.1" min="0" inputmode="decimal">
+        </label>
+        <label>Duration (min)
+          <input type="number" id="runDur" step="1" min="0" inputmode="numeric">
+        </label>
+        <label>Avg HR (optional)
+          <input type="number" id="runHR" step="1" min="0" inputmode="numeric">
+        </label>
+        <label>Notes
+          <textarea id="runNotes" rows="2"></textarea>
+        </label>
+        <button type="submit" class="btn-primary">Save Run</button>
+      </form>
+    </section>
+
+    <!-- LOG BODY -->
+    <section id="viewLogBody" class="view sub-view">
+      <form id="formBody" autocomplete="off">
+        <label>Date
+          <input type="date" id="bodyDate">
+        </label>
+        <label>Bodyweight (kg)
+          <input type="number" id="bodyWeight" step="0.1" min="0" inputmode="decimal">
+        </label>
+        <p class="form-hint">Optional measurements (cm)</p>
+        <div class="form-grid">
+          <label>Neck <input type="number" id="bodyNeck" step="0.1" inputmode="decimal"></label>
+          <label>Chest <input type="number" id="bodyChest" step="0.1" inputmode="decimal"></label>
+          <label>Waist <input type="number" id="bodyWaist" step="0.1" inputmode="decimal"></label>
+          <label>Hips <input type="number" id="bodyHips" step="0.1" inputmode="decimal"></label>
+          <label>L Arm <input type="number" id="bodyLArm" step="0.1" inputmode="decimal"></label>
+          <label>R Arm <input type="number" id="bodyRArm" step="0.1" inputmode="decimal"></label>
+          <label>L Thigh <input type="number" id="bodyLThigh" step="0.1" inputmode="decimal"></label>
+          <label>R Thigh <input type="number" id="bodyRThigh" step="0.1" inputmode="decimal"></label>
+        </div>
+        <button type="submit" class="btn-primary">Save Measurement</button>
+      </form>
+    </section>
+
+    <!-- LOG PR -->
+    <section id="viewLogPR" class="view sub-view">
+      <form id="formPR" autocomplete="off">
+        <label>Exercise
+          <select id="prExercise">
+            <option>Back Squat</option><option>Trap Bar Deadlift</option>
+            <option>Bench Press</option><option>Pull-up</option>
+          </select>
+        </label>
+        <label>Date
+          <input type="date" id="prDate">
+        </label>
+        <label>Load (kg)
+          <input type="number" id="prLoad" step="0.5" min="0" inputmode="decimal" required>
+        </label>
+        <button type="submit" class="btn-primary">Save PR</button>
+      </form>
+    </section>
+
+    <!-- PROGRESS -->
+    <section id="viewProgress" class="view">
+      <div class="tab-row">
+        <button class="tab-btn active" data-ptab="strength">Strength</button>
+        <button class="tab-btn" data-ptab="running">Running</button>
+        <button class="tab-btn" data-ptab="body">Body</button>
+      </div>
+      <div id="progressStrength" class="ptab active">
+        <label>Exercise
+          <select id="progExercise">
+            <option>Back Squat</option><option>Trap Bar Deadlift</option>
+            <option>Bench Press</option><option>Pull-up</option>
+          </select>
+        </label>
+        <canvas id="chartStrength"></canvas>
+        <h3 class="section-title">1RM PR History</h3>
+        <div id="prHistory"></div>
+      </div>
+      <div id="progressRunning" class="ptab">
+        <canvas id="chartMileage"></canvas>
+        <h3 class="section-title" style="margin-top:1.5rem">Pace Over Time</h3>
+        <canvas id="chartPace"></canvas>
+      </div>
+      <div id="progressBody" class="ptab">
+        <canvas id="chartBodyweight"></canvas>
+        <h3 class="section-title" style="margin-top:1.5rem">Measurement History</h3>
+        <div id="bodyHistory" class="table-wrap"></div>
+      </div>
+    </section>
+
+    <!-- BLOCKS -->
+    <section id="viewBlocks" class="view">
+      <button id="newBlockBtn" class="btn-primary" style="margin-bottom:1rem;width:100%">+ New Block</button>
+      <div id="blockList"></div>
+    </section>
+
+    <!-- BLOCK FORM -->
+    <section id="viewBlockForm" class="view sub-view">
+      <form id="formBlock" autocomplete="off">
+        <input type="hidden" id="blockEditId">
+        <label>Block Name
+          <input type="text" id="blockName" required placeholder="e.g. Block 3 – Jun 2025">
+        </label>
+        <label>Template
+          <select id="blockTemplate">
+            <option value="operator">Operator</option>
+            <option value="zulu">Zulu</option>
+            <option value="greyMan">Grey Man</option>
+            <option value="operatorX">Operator-X</option>
+          </select>
+        </label>
+        <label>Start Date
+          <input type="date" id="blockStart">
+        </label>
+        <div id="blockTMSection">
+          <p class="form-hint">Training Maxes (kg) — enter 1RM; TM auto-calculated at 90%</p>
+          <div class="form-grid">
+            <label>Squat 1RM <input type="number" id="block1rmSquat" step="0.5" inputmode="decimal"></label>
+            <label>Deadlift 1RM <input type="number" id="block1rmDeadlift" step="0.5" inputmode="decimal"></label>
+            <label>Bench 1RM <input type="number" id="block1rmBench" step="0.5" inputmode="decimal"></label>
+            <label>Pull-up 1RM <input type="number" id="block1rmPullup" step="0.5" inputmode="decimal"></label>
+          </div>
+          <div id="blockTMDisplay" class="tm-display"></div>
+        </div>
+        <label class="checkbox-label">
+          <input type="checkbox" id="blockActive" checked>
+          Set as active block
+        </label>
+        <button type="submit" class="btn-primary">Save Block</button>
+      </form>
+    </section>
+
+    <!-- EXPORT -->
+    <section id="viewExport" class="view sub-view">
+      <p>Download a full JSON backup of all your data.</p>
+      <button id="exportBtn" class="btn-primary" style="width:100%">Export All Data</button>
+      <hr style="border-color:var(--border);margin:1.5rem 0">
+      <p>Restore from a previous backup:</p>
+      <input type="file" id="importFile" accept=".json">
+      <button id="importBtn" class="btn-secondary" style="width:100%;margin-top:.75rem">Import Data</button>
+    </section>
+
+  </main>
+
+  <!-- ─── TAB BAR ─── -->
+  <nav id="tabBar">
+    <button class="tab active" data-view="Dashboard"><span class="tab-icon">⌂</span><span class="tab-text">Dashboard</span></button>
+    <button class="tab" data-view="Log"><span class="tab-icon">＋</span><span class="tab-text">Log</span></button>
+    <button class="tab" data-view="Progress"><span class="tab-icon">📈</span><span class="tab-text">Progress</span></button>
+    <button class="tab" data-view="Blocks"><span class="tab-icon">▦</span><span class="tab-text">Blocks</span></button>
+  </nav>
+
+</div>
+
+<!-- TOAST -->
+<div id="toast" class="toast hidden"></div>
+
+<!-- Exercise entry template (cloned by JS) -->
+<template id="tplExercise">
+  <div class="exercise-entry">
+    <div class="exercise-header">
+      <select class="ex-name">
+        <option>Back Squat</option><option>Trap Bar Deadlift</option>
+        <option>Bench Press</option><option>Pull-up</option><option>Assisted Pull-up</option>
+      </select>
+      <button type="button" class="btn-icon btn-remove-ex" aria-label="Remove">✕</button>
+    </div>
+    <div class="sets-list"></div>
+    <button type="button" class="btn-secondary btn-add-set">+ Set</button>
+  </div>
+</template>
+
+<template id="tplSet">
+  <div class="set-row">
+    <span class="set-num"></span>
+    <input type="number" class="set-reps" placeholder="Reps" step="1" min="0" inputmode="numeric">
+    <span>×</span>
+    <input type="number" class="set-load" placeholder="kg" step="0.5" min="0" inputmode="decimal">
+    <button type="button" class="btn-icon btn-remove-set" aria-label="Remove">✕</button>
+  </div>
+</template>
+
+<script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
