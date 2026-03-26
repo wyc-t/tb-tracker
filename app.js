@@ -309,7 +309,16 @@ function summariseRun(r) {
   if (r.mode === 'program' && r.setGroups && r.setGroups.length > 0) {
     const parts = r.setGroups.map(g => {
       let s = `${g.sets}×${g.distance}m`;
-      if (g.lapTime) s += ` @${formatSec(g.lapTime)}`;
+      // Handle the new data structure
+      if (g.timeVal) {
+         if (g.timeMode === 'total') s += ` in ${formatSec(g.timeVal)}`;
+         else s += ` @${formatSec(g.timeVal)}/400m`;
+      } 
+       // Fallback for older runs saved before the update
+      else if (g.lapTime) {
+         s += ` @${formatSec(g.lapTime)}`;
+      }
+       
       if (g.rest) s += ` (r${formatSec(g.rest)})`;
       return s;
     });
