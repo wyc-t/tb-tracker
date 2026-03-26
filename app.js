@@ -580,7 +580,46 @@ function addRunSetGroup() {
     group.remove();
     document.querySelectorAll('.run-set-group').forEach((g, i) => g.querySelector('.run-set-title').textContent = 'Set Type ' + (i + 1));
   });
-  group.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => {
+  group.addEventListener('input', () => { // Catch both input and select changes
+     const dist = parseInt(group.querySelector('.rsg-dist').value) || 0;
+     const timeVal = parseInt(group.querySelector('.rsg-time').value) || 0;
+     const timeMode = group.querySelector('.rsg-time-mode').value;
+     const sets = parseInt(group.querySelector('.rsg-sets').value) || 0;
+     const rest = parseInt(group.querySelector('.rsg-rest').value) || 0;
+
+     if (!dist && !timeVal && !sets) { group.querySelector('.rsg-summary').textContent = ''; return; }
+
+     const parts = [];
+     parts.push(`${sets} × ${dist}m = ${(dist * sets / 1000).toFixed(2)} km`);
+
+     if (timeVal > 0 && dist > 0) {
+       let wt, paceDec;
+    
+       // Calculate based on the selected mode
+       if (timeMode === '400m') {
+         paceDec = (timeVal / 60) / 0.4;
+         wt = (dist / 400) * timeVal;
+       } else { // 'total'
+         wt = timeVal;
+         paceDec = (timeVal / 60) / (dist / 1000);
+       }
+
+       const paceMin = Math.floor(paceDec);
+       const paceSec = Math.round((paceDec - paceMin) * 60).toString().padStart(2, '0');
+       parts.push(`Pace: ${paceMin}:${paceSec} min/km`);
+
+       const rt = rest * Math.max(sets - 1, 0);
+       const totalWork = wt * sets;
+    
+       let timeStr = `Total: ${formatSec(Math.round(totalWork + rt))} (work ${formatSec(Math.round(totalWork))}`;
+       if (rest > 0) timeStr += `, rest ${formatSec(rt)}`;
+       timeStr += `)`;
+       parts.push(timeStr);
+     }
+  
+     group.querySelector('.rsg-summary').innerHTML = parts.join('<br>');
+   });
+   group.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => {
     const dist = parseInt(group.querySelector('.rsg-dist').value) || 0;
     const lap = parseInt(group.querySelector('.rsg-lap').value) || 0;
     const sets = parseInt(group.querySelector('.rsg-sets').value) || 0;
@@ -612,11 +651,12 @@ document.getElementById('formRun').addEventListener('submit', async e => {
     const setGroups = [];
     document.querySelectorAll('.run-set-group').forEach(g => {
       const dist = parseInt(g.querySelector('.rsg-dist').value) || 0;
-      const lap = parseInt(g.querySelector('.rsg-lap').value) || 0;
+      const timeVal = parseInt(g.querySelector('.rsg-time').value) || 0;
+      const timeMode = g.querySelector('.rsg-time-mode').value;
       const sets = parseInt(g.querySelector('.rsg-sets').value) || 0;
       const rest = parseInt(g.querySelector('.rsg-rest').value) || 0;
-      if (dist > 0 || sets > 0) setGroups.push({ distance: dist, lapTime: lap, sets, rest });
-    });
+      if (dist > 0 || sets > 0) setGroups.push({ distance: dist, timeVal, timeMode, sets, rest });
+   });
     run.setGroups = setGroups;
     run.duration = parseFloat(document.getElementById('runProgDur').value) || 0;
     run.avgHR = parseInt(document.getElementById('runProgHR').value) || null;
