@@ -12,17 +12,11 @@
 <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-
-<!-- ═══ APP SHELL ═══ -->
 <div id="app">
-
-  <!-- ─── HEADER ─── -->
   <header id="header">
     <h1 id="pageTitle">Dashboard</h1>
     <button id="headerAction" class="header-btn hidden" aria-label="Action"></button>
   </header>
-
-  <!-- ─── VIEWS ─── -->
   <main id="main">
 
     <!-- DASHBOARD -->
@@ -33,25 +27,14 @@
         <span id="dashTemplate" class="dash-sub">—</span>
       </div>
       <div class="dash-row">
-        <div class="dash-card dash-card-sm">
-          <span class="dash-label">Last Lift</span>
-          <span id="dashLastLift" class="dash-val">—</span>
-        </div>
-        <div class="dash-card dash-card-sm">
-          <span class="dash-label">Last Run</span>
-          <span id="dashLastRun" class="dash-val">—</span>
-        </div>
-        <div class="dash-card dash-card-sm">
-          <span class="dash-label">Week km</span>
-          <span id="dashWeekKm" class="dash-val">—</span>
-        </div>
+        <div class="dash-card dash-card-sm"><span class="dash-label">Last Lift</span><span id="dashLastLift" class="dash-val">—</span></div>
+        <div class="dash-card dash-card-sm"><span class="dash-label">Last Run</span><span id="dashLastRun" class="dash-val">—</span></div>
+        <div class="dash-card dash-card-sm"><span class="dash-label">Week km</span><span id="dashWeekKm" class="dash-val">—</span></div>
       </div>
       <h2 class="section-title">1RM PRs</h2>
       <div id="dashPRs" class="pr-row"></div>
       <h2 class="section-title">Body</h2>
-      <div id="dashBody" class="dash-card">
-        <span class="dash-val" style="font-size:1rem;opacity:.5">No measurements yet</span>
-      </div>
+      <div id="dashBody" class="dash-card"><span class="dash-val" style="font-size:1rem;opacity:.5">No measurements yet</span></div>
       <h2 class="section-title">Recent Sessions</h2>
       <div id="dashRecent"></div>
     </section>
@@ -59,50 +42,33 @@
     <!-- LOG MENU -->
     <section id="viewLog" class="view">
       <div class="log-grid">
-        <button class="log-tile" data-goto="logStrength">
-          <span class="log-icon">🏋️</span><span>Strength</span>
-        </button>
-        <button class="log-tile" data-goto="logRun">
-          <span class="log-icon">🏃</span><span>Run</span>
-        </button>
-        <button class="log-tile" data-goto="logBody">
-          <span class="log-icon">📏</span><span>Body</span>
-        </button>
-        <button class="log-tile" data-goto="logPR">
-          <span class="log-icon">🏆</span><span>1RM PR</span>
-        </button>
+        <button class="log-tile" data-goto="logStrength"><span class="log-icon">🏋️</span><span>Strength</span></button>
+        <button class="log-tile" data-goto="logRun"><span class="log-icon">🏃</span><span>Run</span></button>
+        <button class="log-tile" data-goto="logBody"><span class="log-icon">📏</span><span>Body</span></button>
+        <button class="log-tile" data-goto="logPR"><span class="log-icon">🏆</span><span>1RM PR</span></button>
       </div>
     </section>
 
     <!-- LOG STRENGTH -->
     <section id="viewLogStrength" class="view sub-view">
       <form id="formStrength" autocomplete="off">
-        <label>Block
-          <select id="strBlock"></select>
-        </label>
-        <label>Date
-          <input type="date" id="strDate">
-        </label>
-        <label>Week #
-          <select id="strWeek">
-            <option value="1">Week 1</option><option value="2">Week 2</option>
-            <option value="3">Week 3</option><option value="4">Week 4</option>
-            <option value="5">Week 5</option><option value="6">Week 6</option>
-          </select>
-        </label>
+        <label>Block <select id="strBlock"></select></label>
+        <label>Date <input type="date" id="strDate"></label>
+        <label>Week # <select id="strWeek">
+          <option value="1">Week 1</option><option value="2">Week 2</option><option value="3">Week 3</option>
+          <option value="4">Week 4</option><option value="5">Week 5</option><option value="6">Week 6</option>
+        </select></label>
         <label id="strDayLabel" class="hidden">Session Day
-          <select id="strDay">
-            <option value="A">Day A</option>
-            <option value="B">Day B</option>
-          </select>
+          <select id="strDay"><option value="A">Day A</option><option value="B">Day B</option></select>
+        </label>
+        <label class="checkbox-label">
+          <input type="checkbox" id="strUseTM"> Use 90% Training Max
         </label>
         <div id="strSuggestion" class="suggestion hidden"></div>
         <button type="button" id="strAutoFillBtn" class="btn-accent">Load Today's Program</button>
         <div id="strExercises"></div>
         <button type="button" id="addExerciseBtn" class="btn-secondary">+ Add Exercise</button>
-        <label>Notes
-          <textarea id="strNotes" rows="2"></textarea>
-        </label>
+        <label>Notes <textarea id="strNotes" rows="2"></textarea></label>
         <button type="submit" class="btn-primary">Save Session</button>
       </form>
     </section>
@@ -110,75 +76,38 @@
     <!-- LOG RUN -->
     <section id="viewLogRun" class="view sub-view">
       <form id="formRun" autocomplete="off">
-        <label>Date
-          <input type="date" id="runDate">
-        </label>
-        <label>Type
-          <select id="runType">
-            <option>Easy</option><option>LISS</option><option>HIIT</option>
-            <option>Threshold</option><option>Long</option>
-            <option>Tempo</option><option>Intervals</option><option>Fartlek</option>
-          </select>
-        </label>
-
-        <!-- Mode toggle -->
+        <label>Date <input type="date" id="runDate"></label>
+        <label>Type <select id="runType">
+          <option>Easy</option><option>LISS</option><option>HIIT</option><option>Threshold</option>
+          <option>Long</option><option>Tempo</option><option>Intervals</option><option>Fartlek</option>
+        </select></label>
         <div class="run-mode-toggle">
           <button type="button" class="run-mode-btn active" data-mode="general">General</button>
           <button type="button" class="run-mode-btn" data-mode="program">Program</button>
         </div>
-
-        <!-- GENERAL MODE -->
         <div id="runGeneral" class="run-mode active">
-          <label>Distance (km)
-            <input type="number" id="runDist" step="0.1" min="0" inputmode="decimal">
-          </label>
-          <label>Duration (min)
-            <input type="number" id="runDur" step="1" min="0" inputmode="numeric">
-          </label>
-          <label>Avg HR (optional)
-            <input type="number" id="runHR" step="1" min="0" inputmode="numeric">
-          </label>
+          <label>Distance (km) <input type="number" id="runDist" step="0.1" min="0" inputmode="decimal"></label>
+          <label>Duration (min) <input type="number" id="runDur" step="1" min="0" inputmode="numeric"></label>
+          <label>Avg HR (optional) <input type="number" id="runHR" step="1" min="0" inputmode="numeric"></label>
         </div>
-
-        <!-- PROGRAM MODE -->
         <div id="runProgram" class="run-mode">
           <div id="runSetGroups"></div>
           <button type="button" id="addRunSetGroup" class="btn-secondary">+ Add Set Type</button>
-          <label style="margin-top:.5rem">Total Duration (min, optional)
-            <input type="number" id="runProgDur" step="1" min="0" inputmode="numeric">
-          </label>
-          <label>Avg HR (optional)
-            <input type="number" id="runProgHR" step="1" min="0" inputmode="numeric">
-          </label>
+          <label style="margin-top:.5rem">Total Duration (min, optional) <input type="number" id="runProgDur" step="1" min="0" inputmode="numeric"></label>
+          <label>Avg HR (optional) <input type="number" id="runProgHR" step="1" min="0" inputmode="numeric"></label>
         </div>
-
-        <label>Notes
-          <textarea id="runNotes" rows="2"></textarea>
-        </label>
+        <label>Notes <textarea id="runNotes" rows="2"></textarea></label>
         <button type="submit" class="btn-primary">Save Run</button>
       </form>
     </section>
-
-    <!-- Run set group template -->
     <template id="tplRunSetGroup">
       <div class="run-set-group">
-        <div class="run-set-header">
-          <span class="run-set-title">Set Type</span>
-          <button type="button" class="btn-icon btn-remove-rsg" aria-label="Remove">✕</button>
-        </div>
+        <div class="run-set-header"><span class="run-set-title">Set Type</span><button type="button" class="btn-icon btn-remove-rsg" aria-label="Remove">✕</button></div>
         <div class="form-grid">
-          <label>Distance (m)
-            <input type="number" class="rsg-dist" step="1" min="0" inputmode="numeric" placeholder="e.g. 400">
-          </label>
-          <label>Lap Time (sec)
-            <input type="number" class="rsg-lap" step="1" min="0" inputmode="numeric" placeholder="e.g. 90">
-          </label>
-          <label>Sets
-            <input type="number" class="rsg-sets" step="1" min="1" value="1" inputmode="numeric">
-          </label>
-          <label>Rest (sec)
-            <input type="number" class="rsg-rest" step="1" min="0" inputmode="numeric" placeholder="e.g. 60">
-          </label>
+          <label>Distance (m) <input type="number" class="rsg-dist" step="1" min="0" inputmode="numeric" placeholder="e.g. 400"></label>
+          <label>Lap Time (sec) <input type="number" class="rsg-lap" step="1" min="0" inputmode="numeric" placeholder="e.g. 90"></label>
+          <label>Sets <input type="number" class="rsg-sets" step="1" min="1" value="1" inputmode="numeric"></label>
+          <label>Rest (sec) <input type="number" class="rsg-rest" step="1" min="0" inputmode="numeric" placeholder="e.g. 60"></label>
         </div>
         <div class="rsg-summary"></div>
       </div>
@@ -187,12 +116,8 @@
     <!-- LOG BODY -->
     <section id="viewLogBody" class="view sub-view">
       <form id="formBody" autocomplete="off">
-        <label>Date
-          <input type="date" id="bodyDate">
-        </label>
-        <label>Bodyweight (kg)
-          <input type="number" id="bodyWeight" step="0.1" min="0" inputmode="decimal">
-        </label>
+        <label>Date <input type="date" id="bodyDate"></label>
+        <label>Bodyweight (kg) <input type="number" id="bodyWeight" step="0.1" min="0" inputmode="decimal"></label>
         <p class="form-hint">Optional measurements (cm)</p>
         <div class="form-grid">
           <label>Neck <input type="number" id="bodyNeck" step="0.1" inputmode="decimal"></label>
@@ -211,18 +136,12 @@
     <!-- LOG PR -->
     <section id="viewLogPR" class="view sub-view">
       <form id="formPR" autocomplete="off">
-        <label>Exercise
-          <select id="prExercise">
-            <option>Back Squat</option><option>Trap Bar Deadlift</option>
-            <option>Bench Press</option><option>Pull-up</option>
-          </select>
-        </label>
-        <label>Date
-          <input type="date" id="prDate">
-        </label>
-        <label>Load (kg)
-          <input type="number" id="prLoad" step="0.5" min="0" inputmode="decimal" required>
-        </label>
+        <label>Exercise <select id="prExercise">
+          <option>Squat</option><option>Bench</option><option>Deadlift</option>
+          <option>Weighted Pull-up</option><option>Military Press</option>
+        </select></label>
+        <label>Date <input type="date" id="prDate"></label>
+        <label>Load (kg) <input type="number" id="prLoad" step="0.5" min="0" inputmode="decimal" required></label>
         <button type="submit" class="btn-primary">Save PR</button>
       </form>
     </section>
@@ -235,12 +154,10 @@
         <button class="tab-btn" data-ptab="body">Body</button>
       </div>
       <div id="progressStrength" class="ptab active">
-        <label>Exercise
-          <select id="progExercise">
-            <option>Back Squat</option><option>Trap Bar Deadlift</option>
-            <option>Bench Press</option><option>Pull-up</option>
-          </select>
-        </label>
+        <label>Exercise <select id="progExercise">
+          <option>Squat</option><option>Bench</option><option>Deadlift</option>
+          <option>Weighted Pull-up</option><option>Military Press</option>
+        </select></label>
         <canvas id="chartStrength"></canvas>
         <h3 class="section-title">1RM PR History</h3>
         <div id="prHistory"></div>
@@ -267,54 +184,28 @@
     <section id="viewBlockForm" class="view sub-view">
       <form id="formBlock" autocomplete="off">
         <input type="hidden" id="blockEditId">
-        <label>Block Name
-          <input type="text" id="blockName" required placeholder="e.g. Block 3 – Jun 2025">
-        </label>
-        <label>Template
-          <select id="blockTemplate">
-            <option value="operator">Operator</option>
-            <option value="zulu">Zulu</option>
-            <option value="greyMan">Grey Man</option>
-            <option value="operatorX">Operator-X</option>
-          </select>
-        </label>
-        <label>Start Date
-          <input type="date" id="blockStart">
-        </label>
+        <label>Block Name <input type="text" id="blockName" required placeholder="e.g. Block 3 – Jun 2025"></label>
+        <label>Template <select id="blockTemplate">
+          <option value="operator">Operator</option>
+          <option value="zulu">Zulu</option>
+          <option value="fighter">Fighter</option>
+          <option value="mass">Mass</option>
+        </select></label>
+        <label>Start Date <input type="date" id="blockStart"></label>
         <div id="blockTMSection">
-          <p class="form-hint">Training Maxes (kg) — enter 1RM; TM auto-calculated at 90%</p>
-          <div class="form-grid">
-            <label>Squat 1RM <input type="number" id="block1rmSquat" step="0.5" inputmode="decimal"></label>
-            <label>Deadlift 1RM <input type="number" id="block1rmDeadlift" step="0.5" inputmode="decimal"></label>
-            <label>Bench 1RM <input type="number" id="block1rmBench" step="0.5" inputmode="decimal"></label>
-            <label>Pull-up 1RM <input type="number" id="block1rmPullup" step="0.5" inputmode="decimal"></label>
-          </div>
+          <label class="checkbox-label">
+            <input type="checkbox" id="blockUseTM"> Use 90% Training Max
+          </label>
+          <p class="form-hint">Enter your 1RM for each exercise (kg)</p>
+          <div id="block1rmFields" class="form-grid"></div>
           <div id="blockTMDisplay" class="tm-display"></div>
         </div>
         <label class="checkbox-label">
-          <input type="checkbox" id="blockActive" checked>
-          Set as active block
+          <input type="checkbox" id="blockActive" checked> Set as active block
         </label>
         <div id="blockDaysSection">
-          <p class="form-hint">Session Day Exercises — choose which exercises you do on each day</p>
-          <label>Day A Exercises
-            <select id="blockDayA1"><option>Bench Press</option><option>Back Squat</option><option>Trap Bar Deadlift</option><option>Pull-up</option><option>Assisted Pull-up</option></select>
-          </label>
-          <label class="inline-label">
-            <select id="blockDayA2"><option>Back Squat</option><option>Bench Press</option><option>Trap Bar Deadlift</option><option>Pull-up</option><option>Assisted Pull-up</option></select>
-          </label>
-          <label class="inline-label">
-            <select id="blockDayA3"><option>Assisted Pull-up</option><option>Pull-up</option><option>Bench Press</option><option>Back Squat</option><option>Trap Bar Deadlift</option></select>
-          </label>
-          <label style="margin-top:.5rem">Day B Exercises
-            <select id="blockDayB1"><option>Bench Press</option><option>Back Squat</option><option>Trap Bar Deadlift</option><option>Pull-up</option><option>Assisted Pull-up</option></select>
-          </label>
-          <label class="inline-label">
-            <select id="blockDayB2"><option>Back Squat</option><option>Bench Press</option><option>Trap Bar Deadlift</option><option>Pull-up</option><option>Assisted Pull-up</option></select>
-          </label>
-          <label class="inline-label">
-            <select id="blockDayB3"><option>Trap Bar Deadlift</option><option>Bench Press</option><option>Back Squat</option><option>Pull-up</option><option>Assisted Pull-up</option></select>
-          </label>
+          <p class="form-hint">Session exercises per day (auto-set from template)</p>
+          <div id="blockDayConfig"></div>
         </div>
         <button type="submit" class="btn-primary">Save Block</button>
       </form>
@@ -331,35 +222,29 @@
     </section>
 
   </main>
-
-  <!-- ─── TAB BAR ─── -->
   <nav id="tabBar">
     <button class="tab active" data-view="Dashboard"><span class="tab-icon">⌂</span><span class="tab-text">Dashboard</span></button>
     <button class="tab" data-view="Log"><span class="tab-icon">＋</span><span class="tab-text">Log</span></button>
     <button class="tab" data-view="Progress"><span class="tab-icon">📈</span><span class="tab-text">Progress</span></button>
     <button class="tab" data-view="Blocks"><span class="tab-icon">▦</span><span class="tab-text">Blocks</span></button>
   </nav>
-
 </div>
-
-<!-- TOAST -->
 <div id="toast" class="toast hidden"></div>
 
-<!-- Exercise entry template (cloned by JS) -->
 <template id="tplExercise">
   <div class="exercise-entry">
     <div class="exercise-header">
       <select class="ex-name">
-        <option>Back Squat</option><option>Trap Bar Deadlift</option>
-        <option>Bench Press</option><option>Pull-up</option><option>Assisted Pull-up</option>
+        <option>Squat</option><option>Bench</option><option>Deadlift</option>
+        <option>Weighted Pull-up</option><option>Assisted Pull-up</option><option>Military Press</option>
       </select>
       <button type="button" class="btn-icon btn-remove-ex" aria-label="Remove">✕</button>
     </div>
     <div class="sets-list"></div>
+    <div class="plate-info"></div>
     <button type="button" class="btn-secondary btn-add-set">+ Set</button>
   </div>
 </template>
-
 <template id="tplSet">
   <div class="set-row">
     <span class="set-num"></span>

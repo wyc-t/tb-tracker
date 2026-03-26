@@ -1,95 +1,133 @@
 /* ══════════════════════════════════════════
-   TB TRACKER — app.js
-   Tactical Barbell PWA — fully offline
+   TB TRACKER — app.js  v4
    ══════════════════════════════════════════ */
 
-// ─── TB TEMPLATE DEFINITIONS ───
+// ─── TEMPLATES (exact from TB book) ───
 const TB = {
-  exercises: ['Back Squat','Trap Bar Deadlift','Bench Press','Pull-up','Assisted Pull-up'],
-  liftExercises: ['Back Squat','Trap Bar Deadlift','Bench Press','Pull-up','Assisted Pull-up'],
+  // Canonical exercise names used in templates
+  allExercises: ['Squat','Bench','Deadlift','Weighted Pull-up','Assisted Pull-up','Military Press'],
+  prExercises:  ['Squat','Bench','Deadlift','Weighted Pull-up','Military Press'],
+
   templates: {
     operator: {
       name: 'Operator',
-      desc: '3 exercises, 3×/wk — 2 days cluster A, 1 day cluster B',
-      sessionsPerWeek: 3,
-      hasDays: true,
-      defaultDays: {
-        A: ['Bench Press','Back Squat','Assisted Pull-up'],
-        B: ['Bench Press','Back Squat','Trap Bar Deadlift']
+      daysPerWeek: 3,
+      schedule: 'Every other day',
+      sessions: ['A','A','B'],
+      days: {
+        A: ['Squat','Bench','Weighted Pull-up'],
+        B: ['Squat','Bench','Deadlift']
       },
-      dayPattern: ['A','B','A'], // typical weekly rotation
       weeks: [
-        { w:1, sets:5, reps:'3-5', repNum:5, pct:70 },
-        { w:2, sets:5, reps:'3-5', repNum:5, pct:80 },
-        { w:3, sets:3, reps:'3-4', repNum:3, pct:90 },
-        { w:4, sets:5, reps:'3-5', repNum:5, pct:75 },
-        { w:5, sets:3, reps:'3-5', repNum:3, pct:85 },
-        { w:6, sets:2, reps:'3-4', repNum:3, pct:95 },
+        { w:1, sets:'3-5', setsNum:5, reps:5, pct:70 },
+        { w:2, sets:'3-5', setsNum:5, reps:5, pct:80 },
+        { w:3, sets:'3-4', setsNum:3, reps:3, pct:90 },
+        { w:4, sets:'3-5', setsNum:5, reps:5, pct:75 },
+        { w:5, sets:'3-5', setsNum:3, reps:3, pct:85 },
+        { w:6, sets:'3-4', setsNum:2, reps:2, pct:95 },
       ]
     },
     zulu: {
       name: 'Zulu',
-      desc: '4 exercises, 4×/wk, 2 per session',
-      sessionsPerWeek: 4,
-      hasDays: true,
-      defaultDays: {
-        A: ['Back Squat','Bench Press'],
-        B: ['Trap Bar Deadlift','Pull-up']
+      daysPerWeek: 4,
+      schedule: 'A/B alternating',
+      sessions: ['A','B','A','B'],
+      days: {
+        A: ['Military Press','Squat','Weighted Pull-up'],
+        B: ['Bench','Deadlift']
       },
-      dayPattern: ['A','B','A','B'],
       weeks: [
-        { w:1, sets:5, reps:'3-5', repNum:5, pct:70 },
-        { w:2, sets:5, reps:'3-5', repNum:5, pct:80 },
-        { w:3, sets:3, reps:'3-4', repNum:3, pct:90 },
-        { w:4, sets:5, reps:'3-5', repNum:5, pct:75 },
-        { w:5, sets:3, reps:'3-5', repNum:3, pct:85 },
-        { w:6, sets:2, reps:'3-4', repNum:3, pct:95 },
+        { w:1, sets:'3', setsNum:3, reps:5, pct:70 },
+        { w:2, sets:'3', setsNum:3, reps:5, pct:80 },
+        { w:3, sets:'3', setsNum:3, reps:3, pct:90 },
+        { w:4, sets:'3', setsNum:3, reps:5, pct:70 },
+        { w:5, sets:'3', setsNum:3, reps:5, pct:80 },
+        { w:6, sets:'3', setsNum:3, reps:3, pct:90 },
       ]
     },
-    greyMan: {
-      name: 'Grey Man',
-      desc: '2 exercises, 3×/wk, low volume',
-      sessionsPerWeek: 3,
-      hasDays: false,
-      defaultDays: { A: ['Back Squat','Bench Press'] },
-      dayPattern: ['A','A','A'],
+    fighter: {
+      name: 'Fighter',
+      daysPerWeek: 2,
+      schedule: '2 sessions per week',
+      sessions: ['A','A'],
+      days: {
+        A: ['Squat','Bench','Military Press','Deadlift']
+      },
       weeks: [
-        { w:1, sets:3, reps:'3-5', repNum:5, pct:70 },
-        { w:2, sets:3, reps:'3-5', repNum:5, pct:80 },
-        { w:3, sets:2, reps:'3-4', repNum:3, pct:90 },
-        { w:4, sets:3, reps:'3-5', repNum:5, pct:75 },
-        { w:5, sets:2, reps:'3-5', repNum:3, pct:85 },
-        { w:6, sets:1, reps:'3-4', repNum:3, pct:95 },
+        { w:1, sets:'3-5', setsNum:5, reps:5, pct:70 },
+        { w:2, sets:'3-5', setsNum:5, reps:5, pct:80 },
+        { w:3, sets:'3-5', setsNum:5, reps:3, pct:90 },
+        { w:4, sets:'3-5', setsNum:5, reps:5, pct:75 },
+        { w:5, sets:'3-5', setsNum:3, reps:3, pct:85 },
+        { w:6, sets:'3-5', setsNum:3, reps:3, pct:90 },
       ]
     },
-    operatorX: {
-      name: 'Operator-X',
-      desc: '3 exercises, 3×/wk, extra volume',
-      sessionsPerWeek: 3,
-      hasDays: true,
-      defaultDays: {
-        A: ['Bench Press','Back Squat','Pull-up'],
-        B: ['Bench Press','Back Squat','Trap Bar Deadlift']
+    mass: {
+      name: 'Mass',
+      daysPerWeek: 3,
+      schedule: 'Every other day',
+      sessions: ['A','A','A'],
+      days: {
+        A: ['Squat','Bench','Military Press','Deadlift']
       },
-      dayPattern: ['A','B','A'],
       weeks: [
-        { w:1, sets:6, reps:'3-5', repNum:5, pct:70 },
-        { w:2, sets:6, reps:'3-5', repNum:5, pct:80 },
-        { w:3, sets:4, reps:'3-4', repNum:3, pct:90 },
-        { w:4, sets:6, reps:'3-5', repNum:5, pct:75 },
-        { w:5, sets:4, reps:'3-5', repNum:3, pct:85 },
-        { w:6, sets:3, reps:'3-4', repNum:3, pct:95 },
+        { w:1, sets:'4', setsNum:4, reps:6, pct:70 },
+        { w:2, sets:'4', setsNum:4, reps:6, pct:80 },
+        { w:3, sets:'4', setsNum:4, reps:6, pct:85 },
+        { w:4, sets:'4', setsNum:4, reps:6, pct:70 },
+        { w:5, sets:'4', setsNum:4, reps:6, pct:80 },
+        { w:6, sets:'4', setsNum:4, reps:3, pct:90 },
       ]
     }
   },
-  tmFactor: 1.0,
-  roundTo(kg) { return Math.round(kg / 2.5) * 2.5; }
+
+  TM_FACTOR: 0.9,
+  roundTo(kg) { return Math.round(kg / 2.5) * 2.5; },
+
+  // Bar weights
+  barWeight(exercise) {
+    if (exercise === 'Deadlift') return 25;           // trap bar
+    if (exercise === 'Weighted Pull-up') return 0;
+    if (exercise === 'Assisted Pull-up') return 0;
+    return 20; // Squat, Bench, Military Press — standard bar
+  },
+
+  // Available plates (per side)
+  plates: [25, 20, 15, 10, 5, 2.5, 1.25],
+
+  calcPlates(totalKg, exercise) {
+    const bar = TB.barWeight(exercise);
+    if (exercise === 'Weighted Pull-up' || exercise === 'Assisted Pull-up') return null;
+    const remainder = totalKg - bar;
+    if (remainder <= 0) return { bar, perSide: [], total: bar };
+    const perSide = remainder / 2;
+    const plates = [];
+    let left = perSide;
+    for (const p of TB.plates) {
+      while (left >= p - 0.001) {
+        plates.push(p);
+        left -= p;
+      }
+    }
+    return { bar, perSide: plates, total: totalKg };
+  },
+
+  formatPlates(info) {
+    if (!info) return '';
+    if (info.perSide.length === 0) return `Bar only (${info.bar} kg)`;
+    // Group plates
+    const counts = {};
+    info.perSide.forEach(p => { counts[p] = (counts[p] || 0) + 1; });
+    const parts = Object.entries(counts).sort((a,b) => b[0]-a[0])
+      .map(([p, n]) => n > 1 ? `${n}×${p}` : `${p}`);
+    return `${info.bar} kg bar + ${parts.join(' + ')} per side`;
+  }
 };
 
 // ─── DATABASE ───
 let db;
 async function initDB() {
-  db = await idb.openDB('tb-tracker', 2, {
+  db = await idb.openDB('tb-tracker', 3, {
     upgrade(d, oldV) {
       if (oldV < 1) {
         d.createObjectStore('blocks', { keyPath: 'id' });
@@ -102,26 +140,20 @@ async function initDB() {
     }
   });
 }
-
 const uid = () => Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 const today = () => new Date().toISOString().slice(0, 10);
 
-// ─── ROUTING ───
-const views = {
-  Dashboard: 'viewDashboard',
-  Log: 'viewLog',
-  Progress: 'viewProgress',
-  Blocks: 'viewBlocks',
-};
-const subViews = {
-  logStrength: 'viewLogStrength',
-  logRun: 'viewLogRun',
-  logBody: 'viewLogBody',
-  logPR: 'viewLogPR',
-  blockForm: 'viewBlockForm',
-  export: 'viewExport',
-};
+// ─── EXERCISE KEY MAPPING ───
+function exKey(name) {
+  const n = name.toLowerCase().replace(/[^a-z]/g, '');
+  if (n === 'assistedpullup') return 'weightedpullup';
+  return n;
+}
 
+// ─── ROUTING ───
+const views = { Dashboard:'viewDashboard', Log:'viewLog', Progress:'viewProgress', Blocks:'viewBlocks' };
+const subViews = { logStrength:'viewLogStrength', logRun:'viewLogRun', logBody:'viewLogBody',
+  logPR:'viewLogPR', blockForm:'viewBlockForm', export:'viewExport' };
 let currentView = 'Dashboard';
 let viewHistory = [];
 
@@ -130,55 +162,69 @@ function navigateTo(name) {
   const id = views[name] || subViews[name];
   if (!id) return;
   document.getElementById(id).classList.add('active');
-
-  const isMainView = !!views[name];
-  const titles = {
-    Dashboard:'Dashboard', Log:'Log Session', Progress:'Progress',
-    Blocks:'Blocks', logStrength:'Log Strength', logRun:'Log Run',
-    logBody:'Body Measurement', logPR:'Log 1RM PR', blockForm:'Block',
-    export:'Export / Import'
-  };
+  const isMain = !!views[name];
+  const titles = { Dashboard:'Dashboard',Log:'Log Session',Progress:'Progress',Blocks:'Blocks',
+    logStrength:'Log Strength',logRun:'Log Run',logBody:'Body Measurement',logPR:'Log 1RM PR',
+    blockForm:'Block',export:'Export / Import' };
   document.getElementById('pageTitle').textContent = titles[name] || name;
-
-  const actionBtn = document.getElementById('headerAction');
+  const btn = document.getElementById('headerAction');
   if (name === 'Blocks') {
-    actionBtn.classList.remove('hidden');
-    actionBtn.textContent = '⬇ Export';
-    actionBtn.onclick = () => navigateTo('export');
-  } else if (!isMainView) {
-    actionBtn.classList.remove('hidden');
-    actionBtn.textContent = '← Back';
-    actionBtn.onclick = () => {
-      const prev = viewHistory.pop();
-      navigateTo(prev || 'Dashboard');
-    };
-  } else {
-    actionBtn.classList.add('hidden');
-  }
-
-  document.querySelectorAll('#tabBar .tab').forEach(t => {
-    t.classList.toggle('active', t.dataset.view === name);
-  });
-
-  if (!isMainView && !viewHistory.includes(currentView)) {
-    viewHistory.push(currentView);
-  }
-  if (isMainView) viewHistory = [];
+    btn.classList.remove('hidden'); btn.textContent = '⬇ Export';
+    btn.onclick = () => navigateTo('export');
+  } else if (!isMain) {
+    btn.classList.remove('hidden'); btn.textContent = '← Back';
+    btn.onclick = () => navigateTo(viewHistory.pop() || 'Dashboard');
+  } else { btn.classList.add('hidden'); }
+  document.querySelectorAll('#tabBar .tab').forEach(t => t.classList.toggle('active', t.dataset.view === name));
+  if (!isMain && !viewHistory.includes(currentView)) viewHistory.push(currentView);
+  if (isMain) viewHistory = [];
   currentView = name;
-
-  // Hooks
   if (name === 'Dashboard') refreshDashboard();
   if (name === 'Progress') refreshProgress();
   if (name === 'Blocks') refreshBlocks();
   if (name === 'logStrength') initStrengthForm();
 }
 
-// ─── TOAST ───
 function toast(msg, dur = 2000) {
   const el = document.getElementById('toast');
-  el.textContent = msg;
-  el.classList.remove('hidden');
+  el.textContent = msg; el.classList.remove('hidden');
   setTimeout(() => el.classList.add('hidden'), dur);
+}
+
+// ═══════════════════════════════════════════
+//  HELPERS
+// ═══════════════════════════════════════════
+function daysAgo(dateStr) {
+  const diff = Math.floor((new Date() - new Date(dateStr)) / 86400000);
+  if (diff === 0) return 'Today'; if (diff === 1) return 'Yesterday';
+  return diff + 'd ago';
+}
+function getWeekStart() {
+  const d = new Date(); d.setDate(d.getDate() - d.getDay() + 1);
+  return d.toISOString().slice(0, 10);
+}
+function isoWeek(dateStr) {
+  const d = new Date(dateStr); d.setDate(d.getDate() - d.getDay() + 1);
+  return d.toISOString().slice(0, 10);
+}
+function capitalise(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
+function formatSec(s) {
+  const m = Math.floor(s / 60), sec = s % 60;
+  return m > 0 ? `${m}:${String(sec).padStart(2, '0')}` : `${sec}s`;
+}
+
+async function getLatestBodyweight() {
+  const all = await db.getAll('bodyMeasurements');
+  all.sort((a, b) => b.date.localeCompare(a.date));
+  return all[0]?.weight || null;
+}
+
+function computeTrainingWeight(oneRM, pct, useTM) {
+  if (useTM) {
+    const tm = oneRM * TB.TM_FACTOR;
+    return TB.roundTo(tm * pct / 100);
+  }
+  return TB.roundTo(oneRM * pct / 100);
 }
 
 // ═══════════════════════════════════════════
@@ -187,31 +233,20 @@ function toast(msg, dur = 2000) {
 async function refreshDashboard() {
   const blocks = await db.getAll('blocks');
   const active = blocks.find(b => b.active) || blocks[blocks.length - 1];
-
   document.getElementById('dashBlockName').textContent = active ? active.name : 'No block yet';
   document.getElementById('dashTemplate').textContent = active
-    ? TB.templates[active.template]?.name || active.template
-    : 'Create one in Blocks tab';
+    ? (TB.templates[active.template]?.name || active.template) : 'Create one in Blocks tab';
 
-  // Last lift
   const sessions = await db.getAll('sessions');
   sessions.sort((a, b) => b.date.localeCompare(a.date));
-  const lastLift = sessions[0];
-  document.getElementById('dashLastLift').textContent = lastLift
-    ? daysAgo(lastLift.date) : '—';
+  document.getElementById('dashLastLift').textContent = sessions[0] ? daysAgo(sessions[0].date) : '—';
 
-  // Last run
   const runs = await db.getAll('runs');
   runs.sort((a, b) => b.date.localeCompare(a.date));
-  const lastRun = runs[0];
-  document.getElementById('dashLastRun').textContent = lastRun
-    ? daysAgo(lastRun.date) : '—';
+  document.getElementById('dashLastRun').textContent = runs[0] ? daysAgo(runs[0].date) : '—';
 
-  // Weekly km
   const weekStart = getWeekStart();
-  const weekKm = runs
-    .filter(r => r.date >= weekStart)
-    .reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
+  const weekKm = runs.filter(r => r.date >= weekStart).reduce((s, r) => s + (parseFloat(r.distance) || 0), 0);
   document.getElementById('dashWeekKm').textContent = weekKm.toFixed(1);
 
   // PRs
@@ -219,12 +254,8 @@ async function refreshDashboard() {
   const prContainer = document.getElementById('dashPRs');
   prContainer.innerHTML = '';
   const bestPR = {};
-  prs.forEach(p => {
-    if (!bestPR[p.exercise] || p.load > bestPR[p.exercise].load) {
-      bestPR[p.exercise] = p;
-    }
-  });
-  TB.exercises.forEach(ex => {
+  prs.forEach(p => { if (!bestPR[p.exercise] || p.load > bestPR[p.exercise].load) bestPR[p.exercise] = p; });
+  TB.prExercises.forEach(ex => {
     const pr = bestPR[ex];
     const card = document.createElement('div');
     card.className = 'pr-card';
@@ -241,38 +272,26 @@ async function refreshDashboard() {
   const bodyEl = document.getElementById('dashBody');
   if (latest) {
     let parts = [`<strong>${latest.weight || '?'} kg</strong> — ${latest.date}`];
-    const fields = ['neck','chest','waist','hips','leftArm','rightArm','leftThigh','rightThigh'];
-    const labels = ['Neck','Chest','Waist','Hips','L Arm','R Arm','L Thigh','R Thigh'];
-    fields.forEach((f, i) => {
-      if (latest[f]) parts.push(`${labels[i]}: ${latest[f]} cm`);
-    });
+    ['neck','chest','waist','hips','leftArm','rightArm','leftThigh','rightThigh']
+      .forEach((f, i) => { if (latest[f]) parts.push(`${['Neck','Chest','Waist','Hips','L Arm','R Arm','L Thigh','R Thigh'][i]}: ${latest[f]} cm`); });
     bodyEl.innerHTML = `<span class="dash-label">Latest</span><span class="dash-val" style="font-size:.9rem;line-height:1.6">${parts.join('<br>')}</span>`;
   } else {
     bodyEl.innerHTML = '<span class="dash-val" style="font-size:.85rem;opacity:.5">No measurements yet</span>';
   }
 
-  // Recent sessions
+  // Recent
   const recentEl = document.getElementById('dashRecent');
   recentEl.innerHTML = '';
   const combined = [
-    ...sessions.slice(0, 5).map(s => ({
-      type: `W${s.week || '?'} D${s.day || '?'}`,
-      date: s.date,
-      detail: summariseSession(s)
-    })),
-    ...runs.slice(0, 5).map(r => ({
-      type: r.type || 'Run',
-      date: r.date,
-      detail: summariseRun(r)
-    }))
+    ...sessions.slice(0, 5).map(s => ({ type: `W${s.week||'?'} D${s.day||'?'}`, date: s.date, detail: summariseSession(s) })),
+    ...runs.slice(0, 5).map(r => ({ type: r.type || 'Run', date: r.date, detail: summariseRun(r) }))
   ];
   combined.sort((a, b) => b.date.localeCompare(a.date));
   if (combined.length === 0) {
     recentEl.innerHTML = '<div class="empty-state">No sessions logged yet</div>';
   } else {
     combined.slice(0, 5).forEach(c => {
-      const d = document.createElement('div');
-      d.className = 'recent-item';
+      const d = document.createElement('div'); d.className = 'recent-item';
       d.innerHTML = `<span class="ri-type">${c.type}</span><span class="ri-date">${c.date}</span><div class="ri-detail">${c.detail}</div>`;
       recentEl.appendChild(d);
     });
@@ -289,34 +308,17 @@ function summariseSession(s) {
 function summariseRun(r) {
   if (r.mode === 'program' && r.setGroups && r.setGroups.length > 0) {
     const parts = r.setGroups.map(g => {
-      let s = `${g.sets}×${g.distance} m`;
-      if (g.lapTime) s += ` @ ${formatSec(g.lapTime)}`;
-      if (g.rest) s += ` (rest ${formatSec(g.rest)})`;
+      let s = `${g.sets}×${g.distance}m`;
+      if (g.lapTime) s += ` @${formatSec(g.lapTime)}`;
+      if (g.rest) s += ` (r${formatSec(g.rest)})`;
       return s;
     });
-    const total = r.distance ? ` · ${r.distance} km total` : '';
-    return parts.join(' + ') + total;
+    return parts.join(' + ') + (r.distance ? ` · ${r.distance} km` : '');
   }
   let s = `${r.distance || 0} km`;
   if (r.duration) s += ` · ${r.duration} min`;
-  if (r.distance > 0 && r.duration > 0) {
-    const pace = (r.duration / r.distance).toFixed(2);
-    s += ` · ${pace} min/km`;
-  }
+  if (r.distance > 0 && r.duration > 0) s += ` · ${(r.duration / r.distance).toFixed(2)} min/km`;
   return s;
-}
-
-function daysAgo(dateStr) {
-  const diff = Math.floor((new Date() - new Date(dateStr)) / 86400000);
-  if (diff === 0) return 'Today';
-  if (diff === 1) return 'Yesterday';
-  return diff + 'd ago';
-}
-
-function getWeekStart() {
-  const d = new Date();
-  d.setDate(d.getDate() - d.getDay() + 1);
-  return d.toISOString().slice(0, 10);
 }
 
 // ═══════════════════════════════════════════
@@ -324,120 +326,124 @@ function getWeekStart() {
 // ═══════════════════════════════════════════
 async function initStrengthForm() {
   document.getElementById('strDate').value = today();
-
-  // Populate block selector
   const blocks = await db.getAll('blocks');
   const sel = document.getElementById('strBlock');
   sel.innerHTML = '';
   blocks.forEach(b => {
     const opt = document.createElement('option');
-    opt.value = b.id;
-    opt.textContent = b.name;
+    opt.value = b.id; opt.textContent = b.name;
     if (b.active) opt.selected = true;
     sel.appendChild(opt);
   });
-  if (blocks.length === 0) {
-    sel.innerHTML = '<option value="">No blocks — create one first</option>';
-  }
+  if (blocks.length === 0) sel.innerHTML = '<option value="">No blocks — create one first</option>';
 
-  // Clear exercises
   document.getElementById('strExercises').innerHTML = '';
 
-  // Show/hide day selector based on template
+  // Sync TM checkbox with active block
+  const active = blocks.find(b => b.active);
+  if (active) document.getElementById('strUseTM').checked = !!active.useTM;
+
   await updateDaySelector();
   updateStrengthSuggestion();
 
-  // Wire up change events (remove old listeners by replacing elements)
-  sel.onchange = async () => { await updateDaySelector(); updateStrengthSuggestion(); };
+  sel.onchange = async () => {
+    const bl = await db.get('blocks', sel.value);
+    if (bl) document.getElementById('strUseTM').checked = !!bl.useTM;
+    await updateDaySelector();
+    updateStrengthSuggestion();
+  };
   document.getElementById('strWeek').onchange = () => updateStrengthSuggestion();
   document.getElementById('strDay').onchange = () => updateStrengthSuggestion();
+  document.getElementById('strUseTM').onchange = () => updateStrengthSuggestion();
   document.getElementById('strAutoFillBtn').onclick = () => autoFillSession();
 }
 
 async function updateDaySelector() {
   const blockId = document.getElementById('strBlock').value;
-  const dayLabel = document.getElementById('strDayLabel');
-  if (!blockId) { dayLabel.classList.add('hidden'); return; }
-
+  const label = document.getElementById('strDayLabel');
+  if (!blockId) { label.classList.add('hidden'); return; }
   const block = await db.get('blocks', blockId);
-  if (!block) { dayLabel.classList.add('hidden'); return; }
-
+  if (!block) { label.classList.add('hidden'); return; }
   const tpl = TB.templates[block.template];
-  if (!tpl || !tpl.hasDays) {
-    dayLabel.classList.add('hidden');
-  } else {
-    dayLabel.classList.remove('hidden');
-  }
+  if (!tpl) { label.classList.add('hidden'); return; }
+  const days = block.dayExercises || tpl.days;
+  if (days.B) { label.classList.remove('hidden'); }
+  else { label.classList.add('hidden'); }
 }
 
 async function updateStrengthSuggestion() {
   const blockId = document.getElementById('strBlock').value;
   const weekNum = parseInt(document.getElementById('strWeek').value);
   const dayType = document.getElementById('strDay').value;
+  const useTM = document.getElementById('strUseTM').checked;
   const suggEl = document.getElementById('strSuggestion');
 
   if (!blockId) { suggEl.classList.add('hidden'); return; }
   const block = await db.get('blocks', blockId);
   if (!block) { suggEl.classList.add('hidden'); return; }
-
   const tpl = TB.templates[block.template];
   if (!tpl) { suggEl.classList.add('hidden'); return; }
+  const wk = tpl.weeks.find(w => w.w === weekNum);
+  if (!wk) { suggEl.classList.add('hidden'); return; }
 
-  const weekDef = tpl.weeks.find(w => w.w === weekNum);
-  if (!weekDef) { suggEl.classList.add('hidden'); return; }
-
-  // Get day exercises from block config or template defaults
-  const dayExercises = getDayExercises(block, tpl, dayType);
-  const tm = block.trainingMaxes || {};
+  const days = block.dayExercises || tpl.days;
+  const dayEx = days[dayType] || days.A || [];
+  const orm = block.oneRepMaxes || {};
+  const bw = await getLatestBodyweight();
 
   const lines = [];
   lines.push(`<strong>${tpl.name} — Week ${weekNum}, Day ${dayType}</strong>`);
-  lines.push(`<strong>${weekDef.sets} sets × ${weekDef.reps} reps @ ${weekDef.pct}% TM</strong>`);
+  lines.push(`<strong>${wk.sets} sets × ${wk.reps} reps @ ${wk.pct}%${useTM ? ' TM' : ' 1RM'}</strong>`);
   lines.push('');
-  dayExercises.forEach(ex => {
+
+  for (const ex of dayEx) {
     const key = exKey(ex);
-    if (tm[key]) {
-      const load = TB.roundTo(tm[key] * weekDef.pct / 100);
-      lines.push(`${ex}: <strong>${weekDef.sets} × ${weekDef.reps} @ ${load} kg</strong>`);
+    const val = orm[key];
+    if (!val) { lines.push(`${ex}: ${wk.sets} × ${wk.reps} — <em>1RM not set</em>`); continue; }
+    const load = computeTrainingWeight(val, wk.pct, useTM);
+
+    if (ex === 'Assisted Pull-up' && bw) {
+      const assist = TB.roundTo(bw - load);
+      lines.push(`${ex}: <strong>${wk.setsNum} × ${wk.reps} @ ${load} kg</strong> → assist <strong>${assist > 0 ? assist : 0} kg</strong>`);
     } else {
-      lines.push(`${ex}: ${weekDef.sets} × ${weekDef.reps} — <em>TM not set</em>`);
+      let line = `${ex}: <strong>${wk.setsNum} × ${wk.reps} @ ${load} kg</strong>`;
+      const plates = TB.calcPlates(load, ex);
+      if (plates && plates.perSide.length > 0) line += `<br><span style="font-size:.7rem;opacity:.7">  ${TB.formatPlates(plates)}</span>`;
+      lines.push(line);
     }
-  });
+  }
   suggEl.innerHTML = lines.join('<br>');
   suggEl.classList.remove('hidden');
 }
 
 function getDayExercises(block, tpl, dayType) {
-  // Use block-level day config if present, else template defaults
-  const days = block.dayExercises || tpl.defaultDays;
-  return days[dayType] || days['A'] || [];
+  const days = block.dayExercises || tpl.days;
+  return days[dayType] || days.A || [];
 }
 
 async function autoFillSession() {
   const blockId = document.getElementById('strBlock').value;
   if (!blockId) { toast('Select a block first'); return; }
-
   const block = await db.get('blocks', blockId);
   if (!block) return;
-
   const tpl = TB.templates[block.template];
   if (!tpl) return;
-
   const weekNum = parseInt(document.getElementById('strWeek').value);
   const dayType = document.getElementById('strDay').value;
-  const weekDef = tpl.weeks.find(w => w.w === weekNum);
-  if (!weekDef) return;
+  const useTM = document.getElementById('strUseTM').checked;
+  const wk = tpl.weeks.find(w => w.w === weekNum);
+  if (!wk) return;
 
-  const dayExercises = getDayExercises(block, tpl, dayType);
-  const tm = block.trainingMaxes || {};
+  const dayEx = getDayExercises(block, tpl, dayType);
+  const orm = block.oneRepMaxes || {};
+  const bw = await getLatestBodyweight();
 
-  // Clear existing exercises
   document.getElementById('strExercises').innerHTML = '';
 
-  // Add one entry per exercise in the day, fully populated
-  dayExercises.forEach(exName => {
+  for (const exName of dayEx) {
     const key = exKey(exName);
-    const load = tm[key] ? TB.roundTo(tm[key] * weekDef.pct / 100) : 0;
+    const val = orm[key];
+    let load = val ? computeTrainingWeight(val, wk.pct, useTM) : 0;
 
     const tplEl = document.getElementById('tplExercise').content.cloneNode(true);
     const entry = tplEl.querySelector('.exercise-entry');
@@ -445,84 +451,65 @@ async function autoFillSession() {
     entry.querySelector('.btn-remove-ex').addEventListener('click', () => entry.remove());
     entry.querySelector('.btn-add-set').addEventListener('click', () => addSetRow(entry));
 
-    // Add the prescribed number of sets, pre-filled
-    for (let i = 0; i < weekDef.sets; i++) {
+    for (let i = 0; i < wk.setsNum; i++) {
       const setTpl = document.getElementById('tplSet').content.cloneNode(true);
       const row = setTpl.querySelector('.set-row');
       row.querySelector('.set-num').textContent = i + 1;
-      row.querySelector('.set-reps').value = weekDef.repNum;
+      row.querySelector('.set-reps').value = wk.reps;
       if (load > 0) row.querySelector('.set-load').value = load;
-      row.querySelector('.btn-remove-set').addEventListener('click', () => {
-        row.remove();
-        renumberSets(entry);
-      });
+      row.querySelector('.btn-remove-set').addEventListener('click', () => { row.remove(); renumberSets(entry); });
+      // Update plate info on load change
+      row.querySelector('.set-load').addEventListener('input', () => updatePlateInfo(entry));
       entry.querySelector('.sets-list').appendChild(row);
     }
 
-    // Re-fill on exercise change
-    entry.querySelector('.ex-name').addEventListener('change', () => {
-      const bId = document.getElementById('strBlock').value;
-      const wk = parseInt(document.getElementById('strWeek').value);
-      autoFillLoad(entry, bId, wk);
-    });
+    // Plate info
+    const plateEl = entry.querySelector('.plate-info');
+    if (exName === 'Assisted Pull-up' && bw && load > 0) {
+      const assist = TB.roundTo(bw - load);
+      plateEl.innerHTML = `<span class="plate-text">BW ${bw} kg − ${load} kg = <strong>assist ${assist > 0 ? assist : 0} kg</strong></span>`;
+    } else if (load > 0) {
+      const plates = TB.calcPlates(load, exName);
+      if (plates) plateEl.innerHTML = `<span class="plate-text">${TB.formatPlates(plates)}</span>`;
+    }
 
+    entry.querySelector('.ex-name').addEventListener('change', () => updatePlateInfo(entry));
     document.getElementById('strExercises').appendChild(entry);
-  });
-
+  }
   toast('Program loaded ✓');
 }
 
-function exKey(name) {
-  // Map assisted pull-up to same TM as pull-up
-  const n = name.toLowerCase().replace(/[^a-z]/g, '');
-  return n === 'assistedpullup' ? 'pullup' : n;
+async function updatePlateInfo(entry) {
+  const exName = entry.querySelector('.ex-name').value;
+  const firstLoad = entry.querySelector('.set-load');
+  const load = firstLoad ? parseFloat(firstLoad.value) || 0 : 0;
+  const plateEl = entry.querySelector('.plate-info');
+  if (load <= 0) { plateEl.innerHTML = ''; return; }
+
+  if (exName === 'Assisted Pull-up') {
+    const bw = await getLatestBodyweight();
+    if (bw) {
+      const assist = TB.roundTo(bw - load);
+      plateEl.innerHTML = `<span class="plate-text">BW ${bw} kg − ${load} kg = <strong>assist ${assist > 0 ? assist : 0} kg</strong></span>`;
+    } else {
+      plateEl.innerHTML = `<span class="plate-text">Log bodyweight to see assistance</span>`;
+    }
+  } else {
+    const plates = TB.calcPlates(load, exName);
+    if (plates) plateEl.innerHTML = `<span class="plate-text">${TB.formatPlates(plates)}</span>`;
+    else plateEl.innerHTML = '';
+  }
 }
 
 function addExerciseEntry(preselect) {
   const tpl = document.getElementById('tplExercise').content.cloneNode(true);
   const entry = tpl.querySelector('.exercise-entry');
-  if (preselect) {
-    entry.querySelector('.ex-name').value = preselect;
-  }
+  if (preselect) entry.querySelector('.ex-name').value = preselect;
   entry.querySelector('.btn-remove-ex').addEventListener('click', () => entry.remove());
   entry.querySelector('.btn-add-set').addEventListener('click', () => addSetRow(entry));
-  // Start with 3 sets
   for (let i = 0; i < 3; i++) addSetRow(entry);
-
-  // Auto-fill load from suggestion
-  const blockId = document.getElementById('strBlock').value;
-  const weekNum = parseInt(document.getElementById('strWeek').value);
-  autoFillLoad(entry, blockId, weekNum);
-
-  // Re-fill on exercise change
-  entry.querySelector('.ex-name').addEventListener('change', () => {
-    const bId = document.getElementById('strBlock').value;
-    const wk = parseInt(document.getElementById('strWeek').value);
-    autoFillLoad(entry, bId, wk);
-  });
-
+  entry.querySelector('.ex-name').addEventListener('change', () => updatePlateInfo(entry));
   document.getElementById('strExercises').appendChild(entry);
-}
-
-async function autoFillLoad(entry, blockId, weekNum) {
-  if (!blockId) return;
-  const block = await db.get('blocks', blockId);
-  if (!block) return;
-  const tpl = TB.templates[block.template];
-  if (!tpl) return;
-  const weekDef = tpl.weeks.find(w => w.w === weekNum);
-  if (!weekDef) return;
-
-  const exName = entry.querySelector('.ex-name').value;
-  const key = exKey(exName);
-  const tm = block.trainingMaxes || {};
-  if (!tm[key]) return;
-
-  const load = TB.roundTo(tm[key] * weekDef.pct / 100);
-  entry.querySelectorAll('.set-load').forEach(inp => { inp.value = load; });
-  entry.querySelectorAll('.set-reps').forEach(inp => {
-    if (!inp.value) inp.value = weekDef.repNum;
-  });
 }
 
 function addSetRow(entry) {
@@ -530,17 +517,13 @@ function addSetRow(entry) {
   const row = tpl.querySelector('.set-row');
   const list = entry.querySelector('.sets-list');
   row.querySelector('.set-num').textContent = list.children.length + 1;
-  row.querySelector('.btn-remove-set').addEventListener('click', () => {
-    row.remove();
-    renumberSets(entry);
-  });
+  row.querySelector('.btn-remove-set').addEventListener('click', () => { row.remove(); renumberSets(entry); });
+  row.querySelector('.set-load').addEventListener('input', () => updatePlateInfo(entry));
   list.appendChild(row);
 }
 
 function renumberSets(entry) {
-  entry.querySelectorAll('.set-row').forEach((r, i) => {
-    r.querySelector('.set-num').textContent = i + 1;
-  });
+  entry.querySelectorAll('.set-row').forEach((r, i) => r.querySelector('.set-num').textContent = i + 1);
 }
 
 document.getElementById('addExerciseBtn').addEventListener('click', () => addExerciseEntry());
@@ -549,7 +532,6 @@ document.getElementById('formStrength').addEventListener('submit', async e => {
   e.preventDefault();
   const blockId = document.getElementById('strBlock').value;
   if (!blockId) { toast('Create a block first'); return; }
-
   const exercises = [];
   document.querySelectorAll('.exercise-entry').forEach(entry => {
     const name = entry.querySelector('.ex-name').value;
@@ -561,19 +543,15 @@ document.getElementById('formStrength').addEventListener('submit', async e => {
     });
     if (sets.length > 0) exercises.push({ name, sets });
   });
-
   if (exercises.length === 0) { toast('Add at least one exercise'); return; }
-
-  const session = {
-    id: uid(),
-    blockId,
+  await db.put('sessions', {
+    id: uid(), blockId,
     date: document.getElementById('strDate').value || today(),
     week: parseInt(document.getElementById('strWeek').value),
     day: document.getElementById('strDay').value || 'A',
     exercises,
     notes: document.getElementById('strNotes').value.trim()
-  };
-  await db.put('sessions', session);
+  });
   toast('Session saved ✓');
   navigateTo('Dashboard');
 });
@@ -582,132 +560,73 @@ document.getElementById('formStrength').addEventListener('submit', async e => {
 //  LOG RUN
 // ═══════════════════════════════════════════
 let runMode = 'general';
-
-// Mode toggle
 document.querySelectorAll('.run-mode-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.run-mode-btn').forEach(b => b.classList.remove('active'));
     document.querySelectorAll('.run-mode').forEach(m => m.classList.remove('active'));
-    btn.classList.add('active');
-    runMode = btn.dataset.mode;
+    btn.classList.add('active'); runMode = btn.dataset.mode;
     document.getElementById(runMode === 'general' ? 'runGeneral' : 'runProgram').classList.add('active');
-
-    // Auto-add first set group if empty
-    if (runMode === 'program' && document.getElementById('runSetGroups').children.length === 0) {
-      addRunSetGroup();
-    }
+    if (runMode === 'program' && document.getElementById('runSetGroups').children.length === 0) addRunSetGroup();
   });
 });
-
-// Add set group
 document.getElementById('addRunSetGroup').addEventListener('click', () => addRunSetGroup());
 
 function addRunSetGroup() {
   const tpl = document.getElementById('tplRunSetGroup').content.cloneNode(true);
   const group = tpl.querySelector('.run-set-group');
   const container = document.getElementById('runSetGroups');
-  const idx = container.children.length + 1;
-  group.querySelector('.run-set-title').textContent = 'Set Type ' + idx;
-
+  group.querySelector('.run-set-title').textContent = 'Set Type ' + (container.children.length + 1);
   group.querySelector('.btn-remove-rsg').addEventListener('click', () => {
     group.remove();
-    renumberRunSetGroups();
+    document.querySelectorAll('.run-set-group').forEach((g, i) => g.querySelector('.run-set-title').textContent = 'Set Type ' + (i + 1));
   });
-
-  // Live summary
-  group.querySelectorAll('input').forEach(inp => {
-    inp.addEventListener('input', () => updateRunSetSummary(group));
-  });
-
+  group.querySelectorAll('input').forEach(inp => inp.addEventListener('input', () => {
+    const dist = parseInt(group.querySelector('.rsg-dist').value) || 0;
+    const lap = parseInt(group.querySelector('.rsg-lap').value) || 0;
+    const sets = parseInt(group.querySelector('.rsg-sets').value) || 0;
+    const rest = parseInt(group.querySelector('.rsg-rest').value) || 0;
+    if (!dist && !lap && !sets) { group.querySelector('.rsg-summary').textContent = ''; return; }
+    const parts = [];
+    parts.push(`${sets} × ${dist}m = ${(dist * sets / 1000).toFixed(2)} km`);
+    if (lap > 0 && dist > 0) parts.push(`Pace: ${((lap/60)/(dist/1000)).toFixed(2)} min/km`);
+    if (lap > 0 && rest > 0) {
+      const wt = lap * sets, rt = rest * Math.max(sets - 1, 0);
+      parts.push(`Total: ${formatSec(wt + rt)} (work ${formatSec(wt)}, rest ${formatSec(rt)})`);
+    }
+    group.querySelector('.rsg-summary').innerHTML = parts.join('<br>');
+  }));
   container.appendChild(group);
-}
-
-function renumberRunSetGroups() {
-  document.querySelectorAll('.run-set-group').forEach((g, i) => {
-    g.querySelector('.run-set-title').textContent = 'Set Type ' + (i + 1);
-  });
-}
-
-function updateRunSetSummary(group) {
-  const dist = parseInt(group.querySelector('.rsg-dist').value) || 0;
-  const lap = parseInt(group.querySelector('.rsg-lap').value) || 0;
-  const sets = parseInt(group.querySelector('.rsg-sets').value) || 0;
-  const rest = parseInt(group.querySelector('.rsg-rest').value) || 0;
-
-  if (dist === 0 && lap === 0 && sets === 0) {
-    group.querySelector('.rsg-summary').textContent = '';
-    return;
-  }
-
-  const parts = [];
-  const totalDist = (dist * sets) / 1000;
-  parts.push(`${sets} × ${dist} m = ${totalDist.toFixed(2)} km`);
-
-  if (lap > 0 && dist > 0) {
-    const pace = (lap / 60) / (dist / 1000); // min/km
-    parts.push(`Pace: ${pace.toFixed(2)} min/km`);
-  }
-  if (lap > 0 && rest > 0) {
-    const workTime = lap * sets;
-    const restTime = rest * (sets > 1 ? sets - 1 : 0);
-    const totalSec = workTime + restTime;
-    const mins = Math.floor(totalSec / 60);
-    const secs = totalSec % 60;
-    parts.push(`Total: ${mins}:${String(secs).padStart(2, '0')} (work ${formatSec(workTime)}, rest ${formatSec(restTime)})`);
-  }
-
-  group.querySelector('.rsg-summary').innerHTML = parts.join('<br>');
-}
-
-function formatSec(s) {
-  const m = Math.floor(s / 60);
-  const sec = s % 60;
-  return m > 0 ? `${m}:${String(sec).padStart(2, '0')}` : `${sec}s`;
 }
 
 document.getElementById('runDate').value = today();
 document.getElementById('formRun').addEventListener('submit', async e => {
   e.preventDefault();
-
-  const run = {
-    id: uid(),
-    date: document.getElementById('runDate').value || today(),
-    type: document.getElementById('runType').value,
-    mode: runMode,
-    notes: document.getElementById('runNotes').value.trim()
-  };
-
+  const run = { id: uid(), date: document.getElementById('runDate').value || today(),
+    type: document.getElementById('runType').value, mode: runMode,
+    notes: document.getElementById('runNotes').value.trim() };
   if (runMode === 'general') {
     run.distance = parseFloat(document.getElementById('runDist').value) || 0;
     run.duration = parseFloat(document.getElementById('runDur').value) || 0;
     run.avgHR = parseInt(document.getElementById('runHR').value) || null;
   } else {
-    // Program mode — collect set groups
     const setGroups = [];
     document.querySelectorAll('.run-set-group').forEach(g => {
       const dist = parseInt(g.querySelector('.rsg-dist').value) || 0;
       const lap = parseInt(g.querySelector('.rsg-lap').value) || 0;
       const sets = parseInt(g.querySelector('.rsg-sets').value) || 0;
       const rest = parseInt(g.querySelector('.rsg-rest').value) || 0;
-      if (dist > 0 || lap > 0 || sets > 0) {
-        setGroups.push({ distance: dist, lapTime: lap, sets, rest });
-      }
+      if (dist > 0 || sets > 0) setGroups.push({ distance: dist, lapTime: lap, sets, rest });
     });
     run.setGroups = setGroups;
     run.duration = parseFloat(document.getElementById('runProgDur').value) || 0;
     run.avgHR = parseInt(document.getElementById('runProgHR').value) || null;
-    // Compute total distance from set groups
-    run.distance = setGroups.reduce((sum, g) => sum + (g.distance * g.sets) / 1000, 0);
-    run.distance = Math.round(run.distance * 100) / 100;
+    run.distance = Math.round(setGroups.reduce((s, g) => s + g.distance * g.sets / 1000, 0) * 100) / 100;
   }
-
   await db.put('runs', run);
   toast('Run saved ✓');
   document.getElementById('formRun').reset();
   document.getElementById('runDate').value = today();
-  // Reset program set groups
   document.getElementById('runSetGroups').innerHTML = '';
-  // Reset to general mode
   runMode = 'general';
   document.querySelectorAll('.run-mode-btn').forEach(b => b.classList.toggle('active', b.dataset.mode === 'general'));
   document.querySelectorAll('.run-mode').forEach(m => m.classList.toggle('active', m.id === 'runGeneral'));
@@ -715,14 +634,13 @@ document.getElementById('formRun').addEventListener('submit', async e => {
 });
 
 // ═══════════════════════════════════════════
-//  LOG BODY MEASUREMENT
+//  LOG BODY / PR
 // ═══════════════════════════════════════════
 document.getElementById('bodyDate').value = today();
 document.getElementById('formBody').addEventListener('submit', async e => {
   e.preventDefault();
-  const m = {
-    id: uid(),
-    date: document.getElementById('bodyDate').value || today(),
+  await db.put('bodyMeasurements', {
+    id: uid(), date: document.getElementById('bodyDate').value || today(),
     weight: parseFloat(document.getElementById('bodyWeight').value) || null,
     neck: parseFloat(document.getElementById('bodyNeck').value) || null,
     chest: parseFloat(document.getElementById('bodyChest').value) || null,
@@ -732,28 +650,22 @@ document.getElementById('formBody').addEventListener('submit', async e => {
     rightArm: parseFloat(document.getElementById('bodyRArm').value) || null,
     leftThigh: parseFloat(document.getElementById('bodyLThigh').value) || null,
     rightThigh: parseFloat(document.getElementById('bodyRThigh').value) || null,
-  };
-  await db.put('bodyMeasurements', m);
+  });
   toast('Measurement saved ✓');
   document.getElementById('formBody').reset();
   document.getElementById('bodyDate').value = today();
   navigateTo('Dashboard');
 });
 
-// ═══════════════════════════════════════════
-//  LOG 1RM PR
-// ═══════════════════════════════════════════
 document.getElementById('prDate').value = today();
 document.getElementById('formPR').addEventListener('submit', async e => {
   e.preventDefault();
-  const pr = {
-    id: uid(),
-    exercise: document.getElementById('prExercise').value,
-    date: document.getElementById('prDate').value || today(),
-    load: parseFloat(document.getElementById('prLoad').value) || 0,
-  };
-  if (pr.load <= 0) { toast('Enter a load'); return; }
-  await db.put('prLog', pr);
+  const load = parseFloat(document.getElementById('prLoad').value) || 0;
+  if (load <= 0) { toast('Enter a load'); return; }
+  await db.put('prLog', {
+    id: uid(), exercise: document.getElementById('prExercise').value,
+    date: document.getElementById('prDate').value || today(), load
+  });
   toast('PR saved ✓');
   document.getElementById('formPR').reset();
   document.getElementById('prDate').value = today();
@@ -764,7 +676,6 @@ document.getElementById('formPR').addEventListener('submit', async e => {
 //  PROGRESS
 // ═══════════════════════════════════════════
 let chartStr, chartMileage, chartPace, chartBW;
-
 document.querySelectorAll('.tab-btn').forEach(btn => {
   btn.addEventListener('click', () => {
     document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
@@ -774,158 +685,83 @@ document.querySelectorAll('.tab-btn').forEach(btn => {
     refreshProgress();
   });
 });
-
 document.getElementById('progExercise').addEventListener('change', () => refreshProgress());
 
 async function refreshProgress() {
-  const activeTab = document.querySelector('.tab-btn.active')?.dataset.ptab;
-  if (activeTab === 'strength') await refreshStrengthProgress();
-  else if (activeTab === 'running') await refreshRunningProgress();
-  else if (activeTab === 'body') await refreshBodyProgress();
+  const tab = document.querySelector('.tab-btn.active')?.dataset.ptab;
+  if (tab === 'strength') await refreshStrengthProgress();
+  else if (tab === 'running') await refreshRunningProgress();
+  else if (tab === 'body') await refreshBodyProgress();
 }
 
 async function refreshStrengthProgress() {
   const ex = document.getElementById('progExercise').value;
   const sessions = await db.getAll('sessions');
   sessions.sort((a, b) => a.date.localeCompare(b.date));
-
   const data = [];
   sessions.forEach(s => {
     const match = (s.exercises || []).find(e => e.name === ex);
-    if (match) {
-      const bestLoad = match.sets.reduce((m, set) => Math.max(m, set.load || 0), 0);
-      data.push({ date: s.date, load: bestLoad });
-    }
+    if (match) data.push({ date: s.date, load: match.sets.reduce((m, set) => Math.max(m, set.load || 0), 0) });
   });
-
   if (chartStr) chartStr.destroy();
-  const ctx = document.getElementById('chartStrength').getContext('2d');
-  chartStr = new Chart(ctx, {
+  chartStr = new Chart(document.getElementById('chartStrength').getContext('2d'), {
     type: 'line',
-    data: {
-      labels: data.map(d => d.date),
-      datasets: [{
-        label: ex + ' (best set kg)',
-        data: data.map(d => d.load),
-        borderColor: '#e8c547',
-        backgroundColor: 'rgba(232,197,71,.15)',
-        fill: true,
-        tension: .3,
-        pointRadius: 4,
-        pointBackgroundColor: '#e8c547',
-      }]
-    },
+    data: { labels: data.map(d => d.date), datasets: [{ label: ex + ' (best set kg)', data: data.map(d => d.load),
+      borderColor: '#e8c547', backgroundColor: 'rgba(232,197,71,.15)', fill: true, tension: .3, pointRadius: 4, pointBackgroundColor: '#e8c547' }] },
     options: chartOpts('kg')
   });
-
-  // PR history
   const prs = (await db.getAll('prLog')).filter(p => p.exercise === ex);
   prs.sort((a, b) => b.date.localeCompare(a.date));
   const prEl = document.getElementById('prHistory');
-  if (prs.length === 0) {
-    prEl.innerHTML = '<div class="empty-state">No PRs logged</div>';
-  } else {
-    prEl.innerHTML = '<table class="data-table"><thead><tr><th>Date</th><th>Load</th></tr></thead><tbody>'
-      + prs.map(p => `<tr><td>${p.date}</td><td>${p.load} kg</td></tr>`).join('') + '</tbody></table>';
-  }
+  prEl.innerHTML = prs.length === 0 ? '<div class="empty-state">No PRs logged</div>' :
+    '<table class="data-table"><thead><tr><th>Date</th><th>Load</th></tr></thead><tbody>'
+    + prs.map(p => `<tr><td>${p.date}</td><td>${p.load} kg</td></tr>`).join('') + '</tbody></table>';
 }
 
 async function refreshRunningProgress() {
   const runs = await db.getAll('runs');
   runs.sort((a, b) => a.date.localeCompare(b.date));
-
-  // Weekly mileage
   const weekMap = {};
-  runs.forEach(r => {
-    const ws = isoWeek(r.date);
-    weekMap[ws] = (weekMap[ws] || 0) + (parseFloat(r.distance) || 0);
-  });
+  runs.forEach(r => { const ws = isoWeek(r.date); weekMap[ws] = (weekMap[ws] || 0) + (parseFloat(r.distance) || 0); });
   const weeks = Object.keys(weekMap).sort();
-
   if (chartMileage) chartMileage.destroy();
   chartMileage = new Chart(document.getElementById('chartMileage').getContext('2d'), {
-    type: 'bar',
-    data: {
-      labels: weeks,
-      datasets: [{ label: 'Weekly km', data: weeks.map(w => weekMap[w]),
-        backgroundColor: 'rgba(91,141,239,.6)', borderColor: '#5b8def', borderWidth: 1 }]
-    },
-    options: chartOpts('km')
-  });
-
-  // Pace over time
-  const paceData = runs.filter(r => r.distance > 0 && r.duration > 0).map(r => ({
-    date: r.date,
-    pace: r.duration / r.distance // min/km
-  }));
-
+    type: 'bar', data: { labels: weeks, datasets: [{ label: 'Weekly km', data: weeks.map(w => weekMap[w]),
+      backgroundColor: 'rgba(91,141,239,.6)', borderColor: '#5b8def', borderWidth: 1 }] }, options: chartOpts('km') });
+  const paceData = runs.filter(r => r.distance > 0 && r.duration > 0).map(r => ({ date: r.date, pace: +(r.duration / r.distance).toFixed(2) }));
   if (chartPace) chartPace.destroy();
   chartPace = new Chart(document.getElementById('chartPace').getContext('2d'), {
-    type: 'line',
-    data: {
-      labels: paceData.map(d => d.date),
-      datasets: [{ label: 'Pace (min/km)', data: paceData.map(d => +d.pace.toFixed(2)),
-        borderColor: '#4caf7a', backgroundColor: 'rgba(76,175,122,.15)', fill: true, tension: .3,
-        pointRadius: 4, pointBackgroundColor: '#4caf7a' }]
-    },
-    options: chartOpts('min/km')
-  });
+    type: 'line', data: { labels: paceData.map(d => d.date), datasets: [{ label: 'Pace (min/km)', data: paceData.map(d => d.pace),
+      borderColor: '#4caf7a', backgroundColor: 'rgba(76,175,122,.15)', fill: true, tension: .3, pointRadius: 4, pointBackgroundColor: '#4caf7a' }] },
+    options: chartOpts('min/km') });
 }
 
 async function refreshBodyProgress() {
   const body = await db.getAll('bodyMeasurements');
   body.sort((a, b) => a.date.localeCompare(b.date));
-
   const bwData = body.filter(b => b.weight);
   if (chartBW) chartBW.destroy();
   chartBW = new Chart(document.getElementById('chartBodyweight').getContext('2d'), {
-    type: 'line',
-    data: {
-      labels: bwData.map(d => d.date),
-      datasets: [{ label: 'Bodyweight (kg)', data: bwData.map(d => d.weight),
-        borderColor: '#e05555', backgroundColor: 'rgba(224,85,85,.15)', fill: true, tension: .3,
-        pointRadius: 4, pointBackgroundColor: '#e05555' }]
-    },
-    options: chartOpts('kg')
-  });
-
-  // Measurement table
+    type: 'line', data: { labels: bwData.map(d => d.date), datasets: [{ label: 'Bodyweight (kg)', data: bwData.map(d => d.weight),
+      borderColor: '#e05555', backgroundColor: 'rgba(224,85,85,.15)', fill: true, tension: .3, pointRadius: 4, pointBackgroundColor: '#e05555' }] },
+    options: chartOpts('kg') });
   const histEl = document.getElementById('bodyHistory');
-  if (body.length === 0) {
-    histEl.innerHTML = '<div class="empty-state">No data</div>';
-    return;
-  }
+  if (body.length === 0) { histEl.innerHTML = '<div class="empty-state">No data</div>'; return; }
   const cols = ['Date','Weight','Neck','Chest','Waist','Hips','L Arm','R Arm','L Thigh','R Thigh'];
   const keys = ['date','weight','neck','chest','waist','hips','leftArm','rightArm','leftThigh','rightThigh'];
-  let html = '<table class="data-table"><thead><tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>';
-  body.slice().reverse().forEach(b => {
-    html += '<tr>' + keys.map(k => `<td>${b[k] != null ? b[k] : '—'}</td>`).join('') + '</tr>';
-  });
-  html += '</tbody></table>';
-  histEl.innerHTML = html;
+  histEl.innerHTML = '<table class="data-table"><thead><tr>' + cols.map(c => `<th>${c}</th>`).join('') + '</tr></thead><tbody>'
+    + body.slice().reverse().map(b => '<tr>' + keys.map(k => `<td>${b[k] != null ? b[k] : '—'}</td>`).join('') + '</tr>').join('') + '</tbody></table>';
 }
 
 function chartOpts(unit) {
-  return {
-    responsive: true,
-    maintainAspectRatio: false,
-    plugins: {
-      legend: { display: true, labels: { color: '#8b8a96', font: { size: 11 } } },
-    },
+  return { responsive: true, maintainAspectRatio: false,
+    plugins: { legend: { display: true, labels: { color: '#8b8a96', font: { size: 11 } } } },
     scales: {
       x: { ticks: { color: '#8b8a96', maxRotation: 45, font: { size: 10 } }, grid: { color: '#2a2a3a' } },
       y: { ticks: { color: '#8b8a96', font: { size: 10 }, callback: v => v + ' ' + unit }, grid: { color: '#2a2a3a' } }
     }
   };
 }
-
-function isoWeek(dateStr) {
-  const d = new Date(dateStr);
-  d.setDate(d.getDate() - d.getDay() + 1);
-  return d.toISOString().slice(0, 10);
-}
-
-function capitalise(s) { return s.charAt(0).toUpperCase() + s.slice(1); }
 
 // ═══════════════════════════════════════════
 //  BLOCKS
@@ -934,29 +770,21 @@ async function refreshBlocks() {
   const blocks = await db.getAll('blocks');
   blocks.sort((a, b) => (b.startDate || '').localeCompare(a.startDate || ''));
   const el = document.getElementById('blockList');
-  if (blocks.length === 0) {
-    el.innerHTML = '<div class="empty-state">No blocks yet. Create your first block to get started.</div>';
-    return;
-  }
+  if (blocks.length === 0) { el.innerHTML = '<div class="empty-state">No blocks yet.</div>'; return; }
   el.innerHTML = '';
   blocks.forEach(b => {
     const tpl = TB.templates[b.template];
-    const tm = b.trainingMaxes || {};
-    const tmStr = ['Back Squat','Trap Bar Deadlift','Bench Press','Pull-up'].map(ex => {
-      const k = exKey(ex);
-      return tm[k] ? `${ex}: ${tm[k]} kg` : null;
-    }).filter(Boolean).join(' · ');
-
-    const days = b.dayExercises || (tpl ? tpl.defaultDays : {});
+    const orm = b.oneRepMaxes || {};
+    const ormStr = Object.entries(orm).map(([k, v]) => `${k}: ${v}`).join(' · ');
+    const days = b.dayExercises || (tpl ? tpl.days : {});
     const dayStr = days.A ? `Day A: ${days.A.join(', ')}` + (days.B ? `<br>Day B: ${days.B.join(', ')}` : '') : '';
-
     const div = document.createElement('div');
     div.className = 'block-item' + (b.active ? ' is-active' : '');
     div.innerHTML = `
       <div class="bi-name">${b.name}${b.active ? '<span class="bi-badge">Active</span>' : ''}</div>
-      <div class="bi-template">${tpl ? tpl.name : b.template}</div>
+      <div class="bi-template">${tpl ? tpl.name : b.template}${b.useTM ? ' (90% TM)' : ' (from 1RM)'}</div>
       <div class="bi-date">${b.startDate || '—'}</div>
-      <div class="bi-tm">TM: ${tmStr || 'not set'}</div>
+      <div class="bi-tm">1RM: ${ormStr || 'not set'}</div>
       ${dayStr ? `<div class="bi-tm" style="margin-top:.2rem;font-size:.7rem">${dayStr}</div>` : ''}
       <div class="bi-actions">
         <button data-edit="${b.id}">Edit</button>
@@ -965,39 +793,104 @@ async function refreshBlocks() {
       </div>`;
     el.appendChild(div);
   });
+  el.querySelectorAll('[data-edit]').forEach(btn => btn.addEventListener('click', () => editBlock(btn.dataset.edit)));
+  el.querySelectorAll('[data-activate]').forEach(btn => btn.addEventListener('click', async () => {
+    const all = await db.getAll('blocks');
+    for (const bl of all) { bl.active = bl.id === btn.dataset.activate; await db.put('blocks', bl); }
+    toast('Block activated'); refreshBlocks();
+  }));
+  el.querySelectorAll('[data-delete]').forEach(btn => btn.addEventListener('click', async () => {
+    if (!confirm('Delete this block?')) return;
+    await db.delete('blocks', btn.dataset.delete); toast('Block deleted'); refreshBlocks();
+  }));
+}
 
-  el.querySelectorAll('[data-edit]').forEach(btn => {
-    btn.addEventListener('click', () => editBlock(btn.dataset.edit));
+// ─── BLOCK FORM: dynamic 1RM fields & day config ───
+function getTemplateExercises(tplKey) {
+  const tpl = TB.templates[tplKey];
+  if (!tpl) return [];
+  const all = new Set();
+  Object.values(tpl.days).forEach(arr => arr.forEach(e => all.add(e)));
+  return [...all];
+}
+
+function buildBlock1rmFields(tplKey, orm = {}) {
+  const el = document.getElementById('block1rmFields');
+  el.innerHTML = '';
+  const exercises = getTemplateExercises(tplKey);
+  exercises.forEach(ex => {
+    const key = exKey(ex);
+    const label = document.createElement('label');
+    label.textContent = ex + ' 1RM';
+    const inp = document.createElement('input');
+    inp.type = 'number'; inp.step = '0.5'; inp.inputMode = 'decimal';
+    inp.className = 'block-1rm-input'; inp.dataset.exkey = key;
+    inp.value = orm[key] || '';
+    inp.addEventListener('input', updateBlockTMDisplay);
+    label.appendChild(inp);
+    el.appendChild(label);
   });
-  el.querySelectorAll('[data-activate]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      const blocks = await db.getAll('blocks');
-      for (const bl of blocks) {
-        bl.active = bl.id === btn.dataset.activate;
-        await db.put('blocks', bl);
-      }
-      toast('Block activated');
-      refreshBlocks();
-    });
-  });
-  el.querySelectorAll('[data-delete]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      if (!confirm('Delete this block?')) return;
-      await db.delete('blocks', btn.dataset.delete);
-      toast('Block deleted');
-      refreshBlocks();
+  updateBlockTMDisplay();
+}
+
+function buildBlockDayConfig(tplKey, dayExercises) {
+  const tpl = TB.templates[tplKey];
+  if (!tpl) return;
+  const el = document.getElementById('blockDayConfig');
+  el.innerHTML = '';
+  const days = dayExercises || tpl.days;
+  const allOpts = TB.allExercises.map(e => `<option>${e}</option>`).join('');
+
+  Object.keys(tpl.days).forEach(dayKey => {
+    const exList = days[dayKey] || tpl.days[dayKey] || [];
+    const heading = document.createElement('p');
+    heading.className = 'form-hint';
+    heading.style.marginTop = '.5rem';
+    heading.textContent = `Day ${dayKey} (${exList.length} exercises)`;
+    el.appendChild(heading);
+    exList.forEach((ex, i) => {
+      const label = document.createElement('label');
+      label.className = i > 0 ? 'inline-label' : '';
+      const sel = document.createElement('select');
+      sel.className = 'block-day-sel';
+      sel.dataset.day = dayKey;
+      sel.innerHTML = allOpts;
+      sel.value = ex;
+      label.appendChild(sel);
+      el.appendChild(label);
     });
   });
 }
+
+function updateBlockTMDisplay() {
+  const useTM = document.getElementById('blockUseTM').checked;
+  const el = document.getElementById('blockTMDisplay');
+  el.innerHTML = '';
+  document.querySelectorAll('.block-1rm-input').forEach(inp => {
+    const val = parseFloat(inp.value);
+    if (val > 0) {
+      const display = useTM ? TB.roundTo(val * TB.TM_FACTOR) + ' kg TM' : val + ' kg 1RM';
+      el.innerHTML += `<span>${inp.dataset.exkey}: <strong>${display}</strong></span>`;
+    }
+  });
+}
+
+document.getElementById('blockTemplate').addEventListener('change', () => {
+  const tplKey = document.getElementById('blockTemplate').value;
+  buildBlock1rmFields(tplKey);
+  buildBlockDayConfig(tplKey);
+});
+document.getElementById('blockUseTM').addEventListener('change', updateBlockTMDisplay);
 
 document.getElementById('newBlockBtn').addEventListener('click', () => {
   document.getElementById('formBlock').reset();
   document.getElementById('blockEditId').value = '';
   document.getElementById('blockStart').value = today();
   document.getElementById('blockActive').checked = true;
-  document.getElementById('blockTMDisplay').innerHTML = '';
-  // Set default day exercises for Operator
-  setDayExerciseSelectors(TB.templates.operator.defaultDays);
+  document.getElementById('blockUseTM').checked = false;
+  const tplKey = document.getElementById('blockTemplate').value;
+  buildBlock1rmFields(tplKey);
+  buildBlockDayConfig(tplKey);
   navigateTo('blockForm');
 });
 
@@ -1009,118 +902,43 @@ async function editBlock(id) {
   document.getElementById('blockTemplate').value = block.template;
   document.getElementById('blockStart').value = block.startDate || '';
   document.getElementById('blockActive').checked = block.active;
-
-  const tm = block.trainingMaxes || {};
-  // Reverse-calc 1RM from TM
-  document.getElementById('block1rmSquat').value = tm.backsquat ? Math.round(tm.backsquat / TB.tmFactor * 10) / 10 : '';
-  document.getElementById('block1rmDeadlift').value = tm.trapbardeadlift ? Math.round(tm.trapbardeadlift / TB.tmFactor * 10) / 10 : '';
-  document.getElementById('block1rmBench').value = tm.benchpress ? Math.round(tm.benchpress / TB.tmFactor * 10) / 10 : '';
-  document.getElementById('block1rmPullup').value = tm.pullup ? Math.round(tm.pullup / TB.tmFactor * 10) / 10 : '';
-
-  // Populate day exercise selectors
-  const tpl = TB.templates[block.template];
-  const days = block.dayExercises || (tpl ? tpl.defaultDays : TB.templates.operator.defaultDays);
-  setDayExerciseSelectors(days);
-
-  updateTMDisplay();
+  document.getElementById('blockUseTM').checked = !!block.useTM;
+  buildBlock1rmFields(block.template, block.oneRepMaxes || {});
+  buildBlockDayConfig(block.template, block.dayExercises);
   navigateTo('blockForm');
-}
-
-function setDayExerciseSelectors(days) {
-  const a = days.A || [];
-  const b = days.B || days.A || [];
-  if (a[0]) document.getElementById('blockDayA1').value = a[0];
-  if (a[1]) document.getElementById('blockDayA2').value = a[1];
-  if (a[2]) document.getElementById('blockDayA3').value = a[2];
-  if (b[0]) document.getElementById('blockDayB1').value = b[0];
-  if (b[1]) document.getElementById('blockDayB2').value = b[1];
-  if (b[2]) document.getElementById('blockDayB3').value = b[2];
-}
-
-function getDayExercisesFromForm() {
-  return {
-    A: [
-      document.getElementById('blockDayA1').value,
-      document.getElementById('blockDayA2').value,
-      document.getElementById('blockDayA3').value,
-    ],
-    B: [
-      document.getElementById('blockDayB1').value,
-      document.getElementById('blockDayB2').value,
-      document.getElementById('blockDayB3').value,
-    ]
-  };
-}
-
-// Live TM display
-['block1rmSquat','block1rmDeadlift','block1rmBench','block1rmPullup'].forEach(id => {
-  document.getElementById(id).addEventListener('input', updateTMDisplay);
-});
-
-// Update day exercise defaults when template changes
-document.getElementById('blockTemplate').addEventListener('change', () => {
-  const tplKey = document.getElementById('blockTemplate').value;
-  const tpl = TB.templates[tplKey];
-  if (tpl && tpl.defaultDays) {
-    setDayExerciseSelectors(tpl.defaultDays);
-  }
-});
-
-function updateTMDisplay() {
-  const ids = [
-    { id: 'block1rmSquat', label: 'Squat TM' },
-    { id: 'block1rmDeadlift', label: 'Deadlift TM' },
-    { id: 'block1rmBench', label: 'Bench TM' },
-    { id: 'block1rmPullup', label: 'Pull-up TM' },
-  ];
-  const el = document.getElementById('blockTMDisplay');
-  el.innerHTML = '';
-  ids.forEach(({ id, label }) => {
-    const val = parseFloat(document.getElementById(id).value);
-    if (val > 0) {
-      const tm = TB.roundTo(val * TB.tmFactor);
-      el.innerHTML += `<span>${label}: <strong>${tm} kg</strong></span>`;
-    }
-  });
 }
 
 document.getElementById('formBlock').addEventListener('submit', async e => {
   e.preventDefault();
   const editId = document.getElementById('blockEditId').value;
+  const useTM = document.getElementById('blockUseTM').checked;
 
-  const trainingMaxes = {};
-  const sq = parseFloat(document.getElementById('block1rmSquat').value);
-  const dl = parseFloat(document.getElementById('block1rmDeadlift').value);
-  const bp = parseFloat(document.getElementById('block1rmBench').value);
-  const pu = parseFloat(document.getElementById('block1rmPullup').value);
-  if (sq > 0) trainingMaxes.backsquat = TB.roundTo(sq * TB.tmFactor);
-  if (dl > 0) trainingMaxes.trapbardeadlift = TB.roundTo(dl * TB.tmFactor);
-  if (bp > 0) trainingMaxes.benchpress = TB.roundTo(bp * TB.tmFactor);
-  if (pu > 0) trainingMaxes.pullup = TB.roundTo(pu * TB.tmFactor);
+  const oneRepMaxes = {};
+  document.querySelectorAll('.block-1rm-input').forEach(inp => {
+    const val = parseFloat(inp.value);
+    if (val > 0) oneRepMaxes[inp.dataset.exkey] = val;
+  });
+
+  const dayExercises = {};
+  document.querySelectorAll('.block-day-sel').forEach(sel => {
+    const day = sel.dataset.day;
+    if (!dayExercises[day]) dayExercises[day] = [];
+    dayExercises[day].push(sel.value);
+  });
 
   const isActive = document.getElementById('blockActive').checked;
-
-  // If setting active, deactivate others
   if (isActive) {
     const all = await db.getAll('blocks');
-    for (const bl of all) {
-      if (bl.id !== editId && bl.active) {
-        bl.active = false;
-        await db.put('blocks', bl);
-      }
-    }
+    for (const bl of all) { if (bl.id !== editId && bl.active) { bl.active = false; await db.put('blocks', bl); } }
   }
 
-  const block = {
+  await db.put('blocks', {
     id: editId || uid(),
     name: document.getElementById('blockName').value.trim(),
     template: document.getElementById('blockTemplate').value,
     startDate: document.getElementById('blockStart').value || today(),
-    active: isActive,
-    trainingMaxes,
-    dayExercises: getDayExercisesFromForm(),
-  };
-  await db.put('blocks', block);
+    active: isActive, useTM, oneRepMaxes, dayExercises
+  });
   toast('Block saved ✓');
   navigateTo('Blocks');
 });
@@ -1131,15 +949,10 @@ document.getElementById('formBlock').addEventListener('submit', async e => {
 document.getElementById('exportBtn').addEventListener('click', async () => {
   const stores = ['blocks','sessions','runs','bodyMeasurements','prLog','settings'];
   const data = {};
-  for (const s of stores) {
-    data[s] = await db.getAll(s);
-  }
+  for (const s of stores) data[s] = await db.getAll(s);
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-  const a = document.createElement('a');
-  a.href = URL.createObjectURL(blob);
-  a.download = `tb-tracker-backup-${today()}.json`;
-  a.click();
-  URL.revokeObjectURL(a.href);
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
+  a.download = `tb-tracker-backup-${today()}.json`; a.click(); URL.revokeObjectURL(a.href);
   toast('Exported ✓');
 });
 
@@ -1147,76 +960,47 @@ document.getElementById('importBtn').addEventListener('click', async () => {
   const file = document.getElementById('importFile').files[0];
   if (!file) { toast('Select a file first'); return; }
   try {
-    const text = await file.text();
-    const data = JSON.parse(text);
-    const stores = ['blocks','sessions','runs','bodyMeasurements','prLog','settings'];
-    for (const s of stores) {
-      if (data[s]) {
-        const tx = db.transaction(s, 'readwrite');
-        await tx.store.clear();
-        for (const item of data[s]) {
-          await tx.store.put(item);
-        }
-        await tx.done;
-      }
+    const data = JSON.parse(await file.text());
+    for (const s of ['blocks','sessions','runs','bodyMeasurements','prLog','settings']) {
+      if (data[s]) { const tx = db.transaction(s, 'readwrite'); await tx.store.clear();
+        for (const item of data[s]) await tx.store.put(item); await tx.done; }
     }
-    toast('Import complete ✓');
-    refreshDashboard();
-  } catch (err) {
-    toast('Import failed: ' + err.message);
-  }
+    toast('Import complete ✓'); refreshDashboard();
+  } catch (err) { toast('Import failed: ' + err.message); }
 });
 
 // ═══════════════════════════════════════════
 //  NAVIGATION WIRING
 // ═══════════════════════════════════════════
-document.querySelectorAll('#tabBar .tab').forEach(btn => {
-  btn.addEventListener('click', () => navigateTo(btn.dataset.view));
-});
-
-document.querySelectorAll('.log-tile').forEach(btn => {
-  btn.addEventListener('click', () => {
-    const target = btn.dataset.goto;
-    // Set dates fresh
-    const dateIds = { logStrength:'strDate', logRun:'runDate', logBody:'bodyDate', logPR:'prDate' };
-    if (dateIds[target]) document.getElementById(dateIds[target]).value = today();
-    navigateTo(target);
-  });
-});
+document.querySelectorAll('#tabBar .tab').forEach(btn => btn.addEventListener('click', () => navigateTo(btn.dataset.view)));
+document.querySelectorAll('.log-tile').forEach(btn => btn.addEventListener('click', () => {
+  const target = btn.dataset.goto;
+  const dateIds = { logStrength:'strDate', logRun:'runDate', logBody:'bodyDate', logPR:'prDate' };
+  if (dateIds[target]) document.getElementById(dateIds[target]).value = today();
+  navigateTo(target);
+}));
 
 // ═══════════════════════════════════════════
-//  FIRST LAUNCH — seed default block
+//  INIT
 // ═══════════════════════════════════════════
 async function seedDefaults() {
   const blocks = await db.getAll('blocks');
   if (blocks.length === 0) {
     await db.put('blocks', {
-      id: uid(),
-      name: 'Block 1',
-      template: 'operator',
-      startDate: today(),
-      active: true,
-      trainingMaxes: {}
+      id: uid(), name: 'Block 1', template: 'operator',
+      startDate: today(), active: true, useTM: false,
+      oneRepMaxes: {}, dayExercises: TB.templates.operator.days
     });
   }
 }
 
-// ═══════════════════════════════════════════
-//  SERVICE WORKER REGISTRATION
-// ═══════════════════════════════════════════
 async function registerSW() {
   if ('serviceWorker' in navigator) {
-    try {
-      await navigator.serviceWorker.register('./sw.js');
-    } catch (e) {
-      console.warn('SW registration failed:', e);
-    }
+    try { await navigator.serviceWorker.register('./sw.js'); }
+    catch (e) { console.warn('SW registration failed:', e); }
   }
 }
 
-// ═══════════════════════════════════════════
-//  INIT
-// ═══════════════════════════════════════════
 (async () => {
   await initDB();
   await seedDefaults();
