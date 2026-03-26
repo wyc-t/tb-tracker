@@ -176,6 +176,7 @@ input:focus, select:focus, textarea:focus { outline: none; border-color: var(--a
 
 .form-hint { font-size: .75rem; color: var(--text2); margin: .5rem 0 .25rem; }
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: .6rem; }
+.form-grid label { min-width: 0; }
 
 .checkbox-label {
   flex-direction: row; align-items: center; gap: .5rem;
