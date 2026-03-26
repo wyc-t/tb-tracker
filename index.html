@@ -105,7 +105,13 @@
         <div class="run-set-header"><span class="run-set-title">Set Type</span><button type="button" class="btn-icon btn-remove-rsg" aria-label="Remove">✕</button></div>
         <div class="form-grid">
           <label>Distance (m) <input type="number" class="rsg-dist" step="1" min="0" inputmode="numeric" placeholder="e.g. 400"></label>
-          <label>Lap Time (sec) <input type="number" class="rsg-lap" step="1" min="0" inputmode="numeric" placeholder="e.g. 90"></label>
+          <label>
+            <select class="rsg-time-mode" style="background:none; border:none; padding:0; color:inherit; font:inherit; text-transform:inherit; letter-spacing:inherit; width:max-content; outline:none; cursor:pointer;">
+              <option value="400m">400m Lap (sec)</option>
+              <option value="total">Set Duration (sec)</option>
+            </select>
+            <input type="number" class="rsg-time" step="1" min="0" inputmode="numeric" placeholder="e.g. 90">
+            </label>
           <label>Sets <input type="number" class="rsg-sets" step="1" min="1" value="1" inputmode="numeric"></label>
           <label>Rest (sec) <input type="number" class="rsg-rest" step="1" min="0" inputmode="numeric" placeholder="e.g. 60"></label>
         </div>
