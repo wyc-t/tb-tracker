@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tb-tracker-v4';
+const CACHE_NAME = 'tb-tracker-v5';
 const ASSETS = [
   './',
   './index.html',

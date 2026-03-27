@@ -41,7 +41,15 @@
 
     <!-- LOG MENU -->
     <section id="viewLog" class="view">
-      <div class="log-grid">
+      <div class="logbook-filter-row">
+        <button class="logbook-filter active" data-filter="all">All</button>
+        <button class="logbook-filter" data-filter="strength">Strength</button>
+        <button class="logbook-filter" data-filter="run">Run</button>
+        <button class="logbook-filter" data-filter="body">Body</button>
+        <button class="logbook-filter" data-filter="pr">PR</button>
+      </div>
+      <div id="logbook"></div>
+      <div class="log-grid log-grid-bottom">
         <button class="log-tile" data-goto="logStrength"><span class="log-icon">🏋️</span><span>Strength</span></button>
         <button class="log-tile" data-goto="logRun"><span class="log-icon">🏃</span><span>Run</span></button>
         <button class="log-tile" data-goto="logBody"><span class="log-icon">📏</span><span>Body</span></button>
@@ -236,6 +244,30 @@
   </nav>
 </div>
 <div id="toast" class="toast hidden"></div>
+<div id="logDetailModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3 id="modalTitle">Entry Details</h3>
+      <button id="modalClose" class="btn-icon" aria-label="Close">✕</button>
+    </div>
+    <div id="modalBody"></div>
+    <button id="modalDeleteBtn" class="btn-delete">Delete Entry</button>
+  </div>
+</div>
+<div id="floatingStopwatch" class="stopwatch hidden">
+  <div class="sw-collapsed" id="swToggle">
+    <span id="swTimeSmall" class="sw-time-small">0:00</span>
+    <span class="sw-expand-hint">⏱</span>
+  </div>
+  <div class="sw-expanded hidden" id="swExpanded">
+    <span id="swTime" class="sw-time">0:00</span>
+    <div class="sw-btns">
+      <button id="swStart" class="sw-btn sw-btn-start">Start</button>
+      <button id="swReset" class="sw-btn sw-btn-reset">Reset</button>
+      <button id="swMinimise" class="sw-btn sw-btn-min">▼</button>
+    </div>
+  </div>
+</div>
 
 <template id="tplExercise">
   <div class="exercise-entry">

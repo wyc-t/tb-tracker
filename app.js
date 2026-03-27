@@ -1,5 +1,5 @@
 /* ══════════════════════════════════════════
-   TB TRACKER — app.js  v4
+   TB TRACKER — app.js  v5
    ══════════════════════════════════════════ */
 
 // ─── TEMPLATES (exact from TB book) ───
@@ -159,6 +159,8 @@ let viewHistory = [];
 
 function navigateTo(name) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  // Hide stopwatch when leaving strength log
+  if (currentView === 'logStrength' && name !== 'logStrength' && swVisible) hideStopwatch();
   const id = views[name] || subViews[name];
   if (!id) return;
   document.getElementById(id).classList.add('active');
@@ -183,6 +185,7 @@ function navigateTo(name) {
   if (name === 'Progress') refreshProgress();
   if (name === 'Blocks') refreshBlocks();
   if (name === 'logStrength') initStrengthForm();
+  if (name === 'Log') refreshLogbook();
 }
 
 function toast(msg, dur = 2000) {
@@ -485,6 +488,7 @@ async function autoFillSession() {
     entry.querySelector('.ex-name').addEventListener('change', () => updatePlateInfo(entry));
     document.getElementById('strExercises').appendChild(entry);
   }
+  showStopwatch();
   toast('Program loaded ✓');
 }
 
@@ -1016,6 +1020,169 @@ document.getElementById('importBtn').addEventListener('click', async () => {
     }
     toast('Import complete ✓'); refreshDashboard();
   } catch (err) { toast('Import failed: ' + err.message); }
+});
+
+// ═══════════════════════════════════════════
+//  LOGBOOK (Log tab — entry browser)
+// ═══════════════════════════════════════════
+let logbookFilter = 'all';
+document.addEventListener('click', e => {
+  const btn = e.target.closest('.logbook-filter');
+  if (!btn) return;
+  document.querySelectorAll('.logbook-filter').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  logbookFilter = btn.dataset.filter;
+  refreshLogbook();
+});
+
+async function refreshLogbook() {
+  const sessions = (await db.getAll('sessions')).map(s => ({ ...s, _type: 'strength', _sort: s.date }));
+  const runs = (await db.getAll('runs')).map(r => ({ ...r, _type: 'run', _sort: r.date }));
+  const bodies = (await db.getAll('bodyMeasurements')).map(b => ({ ...b, _type: 'body', _sort: b.date }));
+  const prs = (await db.getAll('prLog')).map(p => ({ ...p, _type: 'pr', _sort: p.date }));
+  let all = [...sessions, ...runs, ...bodies, ...prs];
+  if (logbookFilter !== 'all') all = all.filter(e => e._type === logbookFilter);
+  all.sort((a, b) => b._sort.localeCompare(a._sort));
+
+  const el = document.getElementById('logbook');
+  if (all.length === 0) { el.innerHTML = '<div class="empty-state">No entries yet — log a session below</div>'; return; }
+  el.innerHTML = '';
+  all.forEach(entry => {
+    const div = document.createElement('div');
+    div.className = 'lb-entry';
+    const typeLabel = { strength: `W${entry.week||'?'} D${entry.day||'?'}`, run: entry.type || 'Run', body: 'Body', pr: 'PR' }[entry._type];
+    const typeTag = { strength: 'Strength', run: 'Run', body: 'Body', pr: '1RM PR' }[entry._type];
+    let summary = '';
+    if (entry._type === 'strength') summary = summariseSession(entry);
+    else if (entry._type === 'run') summary = summariseRun(entry);
+    else if (entry._type === 'body') summary = `${entry.weight ? entry.weight + ' kg' : '—'}`;
+    else if (entry._type === 'pr') summary = `${entry.exercise}: ${entry.load} kg`;
+    const notes = entry.notes ? `<div class="lb-notes">${entry.notes}</div>` : '';
+    div.innerHTML = `<div class="lb-top"><span class="lb-type">${typeTag} · ${typeLabel}</span><span class="lb-date">${entry.date}</span></div><div class="lb-summary">${summary}</div>${notes}`;
+    div.addEventListener('click', () => openLogDetail(entry));
+    el.appendChild(div);
+  });
+}
+
+// ═══════════════════════════════════════════
+//  LOG DETAIL MODAL + DELETE
+// ═══════════════════════════════════════════
+let modalEntry = null;
+function openLogDetail(entry) {
+  modalEntry = entry;
+  const modal = document.getElementById('logDetailModal');
+  const title = document.getElementById('modalTitle');
+  const body = document.getElementById('modalBody');
+  const storeMap = { strength: 'sessions', run: 'runs', body: 'bodyMeasurements', pr: 'prLog' };
+
+  if (entry._type === 'strength') {
+    title.textContent = `Strength — ${entry.date}`;
+    let html = `<div class="md-section"><span class="md-label">Block</span> · Week ${entry.week || '?'} · Day ${entry.day || '?'}</div>`;
+    (entry.exercises || []).forEach(ex => {
+      const sets = ex.sets.map((s, i) => `Set ${i+1}: ${s.reps} × ${s.load} kg`).join('<br>');
+      html += `<div class="md-ex"><strong>${ex.name}</strong><br>${sets}</div>`;
+    });
+    if (entry.notes) html += `<div class="md-notes">${entry.notes}</div>`;
+    body.innerHTML = html;
+  } else if (entry._type === 'run') {
+    title.textContent = `Run — ${entry.date}`;
+    let html = `<div class="md-section"><span class="md-label">Type</span> <span class="md-val">${entry.type || 'Run'}</span></div>`;
+    if (entry.mode === 'program' && entry.setGroups) {
+      entry.setGroups.forEach((g, i) => {
+        let detail = `${g.sets}×${g.distance}m`;
+        if (g.timeVal) detail += g.timeMode === 'total' ? ` in ${formatSec(g.timeVal)}` : ` @${formatSec(g.timeVal)}/400m`;
+        else if (g.lapTime) detail += ` @${formatSec(g.lapTime)}`;
+        if (g.rest) detail += ` rest ${formatSec(g.rest)}`;
+        html += `<div class="md-ex">Set Type ${i+1}: ${detail}</div>`;
+      });
+    }
+    html += `<div class="md-section"><span class="md-label">Distance</span> <span class="md-val">${entry.distance || 0} km</span></div>`;
+    if (entry.duration) html += `<div class="md-section"><span class="md-label">Duration</span> <span class="md-val">${entry.duration} min</span></div>`;
+    if (entry.avgHR) html += `<div class="md-section"><span class="md-label">Avg HR</span> <span class="md-val">${entry.avgHR} bpm</span></div>`;
+    if (entry.distance > 0 && entry.duration > 0) html += `<div class="md-section"><span class="md-label">Pace</span> <span class="md-val">${(entry.duration / entry.distance).toFixed(2)} min/km</span></div>`;
+    if (entry.notes) html += `<div class="md-notes">${entry.notes}</div>`;
+    body.innerHTML = html;
+  } else if (entry._type === 'body') {
+    title.textContent = `Body — ${entry.date}`;
+    let html = '';
+    if (entry.weight) html += `<div class="md-section"><span class="md-label">Bodyweight</span> <span class="md-val">${entry.weight} kg</span></div>`;
+    const fields = [['neck','Neck'],['chest','Chest'],['waist','Waist'],['hips','Hips'],['leftArm','L Arm'],['rightArm','R Arm'],['leftThigh','L Thigh'],['rightThigh','R Thigh']];
+    const measured = fields.filter(([k]) => entry[k]);
+    if (measured.length > 0) {
+      html += measured.map(([k, lbl]) => `<div class="md-section"><span class="md-label">${lbl}</span> <span class="md-val">${entry[k]} cm</span></div>`).join('');
+    }
+    body.innerHTML = html || '<div class="md-section">No data recorded</div>';
+  } else if (entry._type === 'pr') {
+    title.textContent = `1RM PR — ${entry.date}`;
+    body.innerHTML = `<div class="md-section"><span class="md-label">Exercise</span> <span class="md-val">${entry.exercise}</span></div><div class="md-section"><span class="md-label">Load</span> <span class="md-val">${entry.load} kg</span></div>`;
+  }
+  modal.classList.remove('hidden');
+}
+
+document.getElementById('modalClose').addEventListener('click', () => document.getElementById('logDetailModal').classList.add('hidden'));
+document.getElementById('logDetailModal').addEventListener('click', e => { if (e.target === e.currentTarget) e.currentTarget.classList.add('hidden'); });
+
+document.getElementById('modalDeleteBtn').addEventListener('click', async () => {
+  if (!modalEntry) return;
+  const storeMap = { strength: 'sessions', run: 'runs', body: 'bodyMeasurements', pr: 'prLog' };
+  const store = storeMap[modalEntry._type];
+  if (!store) return;
+  if (!confirm('Delete this entry?')) return;
+  await db.delete(store, modalEntry.id);
+  document.getElementById('logDetailModal').classList.add('hidden');
+  toast('Entry deleted');
+  refreshLogbook();
+  modalEntry = null;
+});
+
+// ═══════════════════════════════════════════
+//  FLOATING STOPWATCH
+// ═══════════════════════════════════════════
+let swInterval = null, swSeconds = 0, swRunning = false, swVisible = false;
+
+function formatSW(sec) {
+  const m = Math.floor(sec / 60), s = sec % 60;
+  return `${m}:${String(s).padStart(2, '0')}`;
+}
+function updateSWDisplay() {
+  document.getElementById('swTime').textContent = formatSW(swSeconds);
+  document.getElementById('swTimeSmall').textContent = formatSW(swSeconds);
+}
+function showStopwatch() {
+  swVisible = true;
+  document.getElementById('floatingStopwatch').classList.remove('hidden');
+}
+function hideStopwatch() {
+  swVisible = false;
+  stopSW();
+  swSeconds = 0;
+  updateSWDisplay();
+  document.getElementById('floatingStopwatch').classList.add('hidden');
+}
+function startSW() {
+  if (swRunning) { stopSW(); return; }
+  swRunning = true;
+  document.getElementById('swStart').textContent = 'Stop';
+  document.getElementById('swStart').classList.add('running');
+  swInterval = setInterval(() => { swSeconds++; updateSWDisplay(); }, 1000);
+}
+function stopSW() {
+  swRunning = false;
+  document.getElementById('swStart').textContent = 'Start';
+  document.getElementById('swStart').classList.remove('running');
+  if (swInterval) { clearInterval(swInterval); swInterval = null; }
+}
+function resetSW() { stopSW(); swSeconds = 0; updateSWDisplay(); }
+
+document.getElementById('swStart').addEventListener('click', startSW);
+document.getElementById('swReset').addEventListener('click', resetSW);
+document.getElementById('swToggle').addEventListener('click', () => {
+  document.getElementById('swToggle').style.display = 'none';
+  document.getElementById('swExpanded').classList.remove('hidden');
+});
+document.getElementById('swMinimise').addEventListener('click', () => {
+  document.getElementById('swExpanded').classList.add('hidden');
+  document.getElementById('swToggle').style.display = '';
 });
 
 // ═══════════════════════════════════════════
