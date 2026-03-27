@@ -86,8 +86,7 @@
       <form id="formRun" autocomplete="off">
         <label>Date <input type="date" id="runDate"></label>
         <label>Type <select id="runType">
-          <option>Easy</option><option>LISS</option><option>HIIT</option><option>Threshold</option>
-          <option>Long</option><option>Tempo</option><option>Intervals</option><option>Fartlek</option>
+          <option>Easy</option><option>LSD</option><option>Tempo</option><option>Interval</option><option>Race</option>
         </select></label>
         <div class="run-mode-toggle">
           <button type="button" class="run-mode-btn active" data-mode="general">General</button>
@@ -292,6 +291,22 @@
     <button type="button" class="btn-icon btn-remove-set" aria-label="Remove">✕</button>
   </div>
 </template>
+
+<!-- BACKUP REMINDER MODAL -->
+<div id="backupReminderModal" class="modal-overlay hidden">
+  <div class="modal-content">
+    <div class="modal-header">
+      <h3>📦 Backup Reminder</h3>
+    </div>
+    <div style="margin-bottom:1rem">
+      <p style="color:var(--text-secondary);font-size:.9rem;line-height:1.6">
+        It's been over 30 days since your last backup. Export your logbook to avoid losing data.
+      </p>
+    </div>
+    <button id="backupReminderExport" class="btn-primary" style="width:100%;margin-bottom:.5rem">Export Now</button>
+    <button id="backupReminderDismiss" class="btn-secondary" style="width:100%">Remind Me Later</button>
+  </div>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/idb@8/build/umd.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/chart.js@4/dist/chart.umd.min.js"></script>

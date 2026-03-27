@@ -256,15 +256,30 @@ async function refreshDashboard() {
   const prs = await db.getAll('prLog');
   const prContainer = document.getElementById('dashPRs');
   prContainer.innerHTML = '';
-  const bestPR = {};
-  prs.forEach(p => { if (!bestPR[p.exercise] || p.load > bestPR[p.exercise].load) bestPR[p.exercise] = p; });
+  // Group PRs by exercise, sort each group by date ascending
+  const prByEx = {};
+  prs.forEach(p => {
+    if (!prByEx[p.exercise]) prByEx[p.exercise] = [];
+    prByEx[p.exercise].push(p);
+  });
+  Object.keys(prByEx).forEach(ex => prByEx[ex].sort((a, b) => a.date.localeCompare(b.date)));
+
   TB.prExercises.forEach(ex => {
-    const pr = bestPR[ex];
+    const entries = prByEx[ex] || [];
+    const latest = entries[entries.length - 1] || null;
+    const prev = entries.length >= 2 ? entries[entries.length - 2] : null;
+    let pctHtml = '';
+    if (latest && prev && prev.load > 0) {
+      const pct = ((latest.load - prev.load) / prev.load * 100);
+      const sign = pct >= 0 ? '+' : '';
+      const col = pct > 0 ? 'var(--green, #4caf7a)' : pct < 0 ? 'var(--red, #e05555)' : '#8b8a96';
+      pctHtml = `<div class="pr-pct" style="color:${col};font-size:.75rem;margin-top:.1rem">${sign}${pct.toFixed(1)}%</div>`;
+    }
     const card = document.createElement('div');
     card.className = 'pr-card';
     card.innerHTML = `<div class="pr-name">${ex}</div>
-      <div class="pr-val">${pr ? pr.load + ' kg' : '—'}</div>
-      <div class="pr-date">${pr ? pr.date : ''}</div>`;
+      <div class="pr-val">${latest ? latest.load + ' kg' : '—'}</div>
+      <div class="pr-date">${latest ? latest.date : ''}</div>${pctHtml}`;
     prContainer.appendChild(card);
   });
 
@@ -282,16 +297,18 @@ async function refreshDashboard() {
     bodyEl.innerHTML = '<span class="dash-val" style="font-size:.85rem;opacity:.5">No measurements yet</span>';
   }
 
-  // Recent
+  // Recent — last 7 days only
   const recentEl = document.getElementById('dashRecent');
   recentEl.innerHTML = '';
+  const cutoff = new Date(); cutoff.setDate(cutoff.getDate() - 7);
+  const cutoffStr = cutoff.toISOString().slice(0, 10);
   const combined = [
-    ...sessions.slice(0, 5).map(s => ({ type: `W${s.week||'?'} D${s.day||'?'}`, date: s.date, detail: summariseSession(s) })),
-    ...runs.slice(0, 5).map(r => ({ type: r.type || 'Run', date: r.date, detail: summariseRun(r) }))
+    ...sessions.filter(s => s.date >= cutoffStr).map(s => ({ type: `W${s.week||'?'} D${s.day||'?'}`, date: s.date, detail: summariseSession(s) })),
+    ...runs.filter(r => r.date >= cutoffStr).map(r => ({ type: r.type || 'Run', date: r.date, detail: summariseRun(r) }))
   ];
   combined.sort((a, b) => b.date.localeCompare(a.date));
   if (combined.length === 0) {
-    recentEl.innerHTML = '<div class="empty-state">No sessions logged yet</div>';
+    recentEl.innerHTML = '<div class="empty-state">No sessions in the last 7 days</div>';
   } else {
     combined.slice(0, 5).forEach(c => {
       const d = document.createElement('div'); d.className = 'recent-item';
@@ -314,7 +331,8 @@ function summariseRun(r) {
       let s = `${g.sets}×${g.distance}m`;
       // Handle the new data structure
       if (g.timeVal) {
-         if (g.timeMode === 'total') s += ` in ${formatSec(g.timeVal)}`;
+         if (g.timeMode === 'total' || (g.timeMode === '400m' && g.distance < 400))
+           s += ` in ${formatSec(g.timeVal)}`;
          else s += ` @${formatSec(g.timeVal)}/400m`;
       } 
        // Fallback for older runs saved before the update
@@ -608,11 +626,11 @@ function addRunSetGroup() {
      if (timeVal > 0 && dist > 0) {
        let wt, paceDec;
     
-       // Calculate based on the selected mode
-       if (timeMode === '400m') {
+       // For distances >= 400m, use 400m lap time to extrapolate; for < 400m, use time directly
+       if (timeMode === '400m' && dist >= 400) {
          paceDec = (timeVal / 60) / 0.4;
          wt = (dist / 400) * timeVal;
-       } else { // 'total'
+       } else { // 'total' mode OR sub-400m distance (use entered time directly)
          wt = timeVal;
          paceDec = (timeVal / 60) / (dist / 1000);
        }
@@ -1006,6 +1024,8 @@ document.getElementById('exportBtn').addEventListener('click', async () => {
   const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob);
   a.download = `tb-tracker-backup-${today()}.json`; a.click(); URL.revokeObjectURL(a.href);
+  localStorage.setItem('tb_last_backup', Date.now().toString());
+  document.getElementById('backupReminderModal').classList.add('hidden');
   toast('Exported ✓');
 });
 
@@ -1090,7 +1110,8 @@ function openLogDetail(entry) {
     if (entry.mode === 'program' && entry.setGroups) {
       entry.setGroups.forEach((g, i) => {
         let detail = `${g.sets}×${g.distance}m`;
-        if (g.timeVal) detail += g.timeMode === 'total' ? ` in ${formatSec(g.timeVal)}` : ` @${formatSec(g.timeVal)}/400m`;
+        if (g.timeVal) detail += (g.timeMode === 'total' || (g.timeMode === '400m' && g.distance < 400))
+          ? ` in ${formatSec(g.timeVal)}` : ` @${formatSec(g.timeVal)}/400m`;
         else if (g.lapTime) detail += ` @${formatSec(g.lapTime)}`;
         if (g.rest) detail += ` rest ${formatSec(g.rest)}`;
         html += `<div class="md-ex">Set Type ${i+1}: ${detail}</div>`;
@@ -1217,9 +1238,34 @@ async function registerSW() {
   }
 }
 
+// ═══════════════════════════════════════════
+//  BACKUP REMINDER
+// ═══════════════════════════════════════════
+function checkBackupReminder() {
+  const THIRTY_DAYS_MS = 30 * 24 * 60 * 60 * 1000;
+  const last = parseInt(localStorage.getItem('tb_last_backup') || '0', 10);
+  if (Date.now() - last > THIRTY_DAYS_MS) {
+    document.getElementById('backupReminderModal').classList.remove('hidden');
+  }
+}
+
+document.getElementById('backupReminderDismiss').addEventListener('click', () => {
+  // Snooze: set last_backup to now so it won't re-trigger for another 30 days
+  localStorage.setItem('tb_last_backup', Date.now().toString());
+  document.getElementById('backupReminderModal').classList.add('hidden');
+});
+
+document.getElementById('backupReminderExport').addEventListener('click', () => {
+  // Trigger the real export button
+  document.getElementById('backupReminderModal').classList.add('hidden');
+  navigateTo('export');
+  setTimeout(() => document.getElementById('exportBtn').click(), 150);
+});
+
 (async () => {
   await initDB();
   await seedDefaults();
   await registerSW();
+  checkBackupReminder();
   navigateTo('Dashboard');
 })();
