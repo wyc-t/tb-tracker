@@ -1160,6 +1160,34 @@ document.getElementById('modalDeleteBtn').addEventListener('click', async () => 
 //  FLOATING STOPWATCH
 // ═══════════════════════════════════════════
 let swInterval = null, swSeconds = 0, swRunning = false, swVisible = false;
+let sw2minFired = false; // guard so the 2-min notification only fires once per run
+
+async function requestNotificationPermission() {
+  if (!('Notification' in window)) return 'unsupported';
+  if (Notification.permission === 'granted') return 'granted';
+  if (Notification.permission === 'denied') return 'denied';
+  return await Notification.requestPermission();
+}
+
+async function fireSWNotification() {
+  if (!('Notification' in window) || Notification.permission !== 'granted') return;
+  const title = '⏱ 2 minutes — rest up';
+  const opts = {
+    body: 'Stopwatch hit 2:00. Time to get back to it.',
+    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%230a0a0f'/><text x='256' y='340' font-size='280' font-family='system-ui' font-weight='900' fill='%23e8c547' text-anchor='middle'>TB</text></svg>",
+    badge: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%230a0a0f'/><text x='256' y='340' font-size='280' font-family='system-ui' font-weight='900' fill='%23e8c547' text-anchor='middle'>TB</text></svg>",
+    tag: 'tb-stopwatch-2min',
+    renotify: false,
+    silent: false,
+  };
+  // Prefer SW notification (shows on lock screen); fall back to plain Notification
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    await reg.showNotification(title, opts);
+  } catch {
+    new Notification(title, opts);
+  }
+}
 
 function formatSW(sec) {
   const m = Math.floor(sec / 60), s = sec % 60;
@@ -1177,15 +1205,26 @@ function hideStopwatch() {
   swVisible = false;
   stopSW();
   swSeconds = 0;
+  sw2minFired = false;
   updateSWDisplay();
   document.getElementById('floatingStopwatch').classList.add('hidden');
 }
-function startSW() {
+async function startSW() {
   if (swRunning) { stopSW(); return; }
+  // Ask for notification permission the first time the user starts the timer
+  await requestNotificationPermission();
   swRunning = true;
   document.getElementById('swStart').textContent = 'Stop';
   document.getElementById('swStart').classList.add('running');
-  swInterval = setInterval(() => { swSeconds++; updateSWDisplay(); }, 1000);
+  swInterval = setInterval(() => {
+    swSeconds++;
+    updateSWDisplay();
+    // Fire once when the counter crosses 2:00
+    if (swSeconds === 120 && !sw2minFired) {
+      sw2minFired = true;
+      fireSWNotification();
+    }
+  }, 1000);
 }
 function stopSW() {
   swRunning = false;
@@ -1193,7 +1232,7 @@ function stopSW() {
   document.getElementById('swStart').classList.remove('running');
   if (swInterval) { clearInterval(swInterval); swInterval = null; }
 }
-function resetSW() { stopSW(); swSeconds = 0; updateSWDisplay(); }
+function resetSW() { stopSW(); swSeconds = 0; sw2minFired = false; updateSWDisplay(); }
 
 document.getElementById('swStart').addEventListener('click', startSW);
 document.getElementById('swReset').addEventListener('click', resetSW);

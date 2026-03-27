@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tb-tracker-v5';
+const CACHE_NAME = 'tb-tracker-v6';
 const ASSETS = [
   './',
   './index.html',
@@ -30,5 +30,20 @@ self.addEventListener('fetch', e => {
       caches.open(CACHE_NAME).then(c => c.put(e.request, clone));
       return resp;
     })).catch(() => caches.match('./index.html'))
+  );
+});
+
+// Bring app to foreground when the user taps the 2-min notification
+self.addEventListener('notificationclick', e => {
+  e.notification.close();
+  e.waitUntil(
+    clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
+      // Focus an existing window if one is open
+      for (const client of list) {
+        if ('focus' in client) return client.focus();
+      }
+      // Otherwise open a new window
+      return clients.openWindow('./');
+    })
   );
 });
