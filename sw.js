@@ -1,4 +1,4 @@
-const CACHE_NAME = 'tb-tracker-v6';
+const CACHE_NAME = 'tb-tracker-v7';
 const ASSETS = [
   './',
   './index.html',
@@ -38,12 +38,39 @@ self.addEventListener('notificationclick', e => {
   e.notification.close();
   e.waitUntil(
     clients.matchAll({ type: 'window', includeUncontrolled: true }).then(list => {
-      // Focus an existing window if one is open
       for (const client of list) {
         if ('focus' in client) return client.focus();
       }
-      // Otherwise open a new window
       return clients.openWindow('./');
     })
   );
+});
+
+// Schedule a notification from the page even when it is backgrounded.
+// event.waitUntil() keeps the SW alive for the duration of the promise.
+let _scheduledTimer = null;
+self.addEventListener('message', e => {
+  if (e.data?.type === 'SCHEDULE_SW_NOTIF') {
+    // Cancel any previously scheduled notification first
+    if (_scheduledTimer) { clearTimeout(_scheduledTimer); _scheduledTimer = null; }
+    const delay = e.data.delay;
+    e.waitUntil(
+      new Promise(resolve => {
+        _scheduledTimer = setTimeout(async () => {
+          _scheduledTimer = null;
+          await self.registration.showNotification('⏱ 2 minutes — rest up', {
+            body: 'Stopwatch hit 2:00. Time to get back to it.',
+            icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%230a0a0f'/><text x='256' y='340' font-size='280' font-family='system-ui' font-weight='900' fill='%23e8c547' text-anchor='middle'>TB</text></svg>",
+            tag: 'tb-stopwatch-2min',
+            renotify: false,
+          });
+          resolve();
+        }, delay);
+      })
+    );
+  }
+
+  if (e.data?.type === 'CANCEL_SW_NOTIF') {
+    if (_scheduledTimer) { clearTimeout(_scheduledTimer); _scheduledTimer = null; }
+  }
 });

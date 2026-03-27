@@ -1159,8 +1159,15 @@ document.getElementById('modalDeleteBtn').addEventListener('click', async () => 
 // ═══════════════════════════════════════════
 //  FLOATING STOPWATCH
 // ═══════════════════════════════════════════
-let swInterval = null, swSeconds = 0, swRunning = false, swVisible = false;
-let sw2minFired = false; // guard so the 2-min notification only fires once per run
+let swInterval = null, swRunning = false, swVisible = false;
+let swStartEpoch = 0;   // Date.now() when the current run started
+let swBaseSeconds = 0;  // seconds already elapsed before the current run (for stop/resume)
+let sw2minScheduled = false;
+
+function swElapsed() {
+  // Always compute from wall-clock so backgrounded tabs don't drift
+  return swRunning ? swBaseSeconds + Math.floor((Date.now() - swStartEpoch) / 1000) : swBaseSeconds;
+}
 
 async function requestNotificationPermission() {
   if (!('Notification' in window)) return 'unsupported';
@@ -1169,24 +1176,19 @@ async function requestNotificationPermission() {
   return await Notification.requestPermission();
 }
 
-async function fireSWNotification() {
-  if (!('Notification' in window) || Notification.permission !== 'granted') return;
-  const title = '⏱ 2 minutes — rest up';
-  const opts = {
-    body: 'Stopwatch hit 2:00. Time to get back to it.',
-    icon: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%230a0a0f'/><text x='256' y='340' font-size='280' font-family='system-ui' font-weight='900' fill='%23e8c547' text-anchor='middle'>TB</text></svg>",
-    badge: "data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 512 512'><rect width='512' height='512' rx='96' fill='%230a0a0f'/><text x='256' y='340' font-size='280' font-family='system-ui' font-weight='900' fill='%23e8c547' text-anchor='middle'>TB</text></svg>",
-    tag: 'tb-stopwatch-2min',
-    renotify: false,
-    silent: false,
-  };
-  // Prefer SW notification (shows on lock screen); fall back to plain Notification
+// Ask the SW to schedule (or cancel) the notification so it fires even when
+// the page is suspended. The SW keeps itself alive via waitUntil().
+async function scheduleSWNotif(delayMs) {
   try {
     const reg = await navigator.serviceWorker.ready;
-    await reg.showNotification(title, opts);
-  } catch {
-    new Notification(title, opts);
-  }
+    reg.active.postMessage({ type: 'SCHEDULE_SW_NOTIF', delay: delayMs });
+  } catch (e) { console.warn('SW notif schedule failed', e); }
+}
+async function cancelSWNotif() {
+  try {
+    const reg = await navigator.serviceWorker.ready;
+    reg.active.postMessage({ type: 'CANCEL_SW_NOTIF' });
+  } catch {}
 }
 
 function formatSW(sec) {
@@ -1194,8 +1196,9 @@ function formatSW(sec) {
   return `${m}:${String(s).padStart(2, '0')}`;
 }
 function updateSWDisplay() {
-  document.getElementById('swTime').textContent = formatSW(swSeconds);
-  document.getElementById('swTimeSmall').textContent = formatSW(swSeconds);
+  const t = formatSW(swElapsed());
+  document.getElementById('swTime').textContent = t;
+  document.getElementById('swTimeSmall').textContent = t;
 }
 function showStopwatch() {
   swVisible = true;
@@ -1204,35 +1207,51 @@ function showStopwatch() {
 function hideStopwatch() {
   swVisible = false;
   stopSW();
-  swSeconds = 0;
-  sw2minFired = false;
+  swBaseSeconds = 0;
+  sw2minScheduled = false;
+  cancelSWNotif();
   updateSWDisplay();
   document.getElementById('floatingStopwatch').classList.add('hidden');
 }
 async function startSW() {
   if (swRunning) { stopSW(); return; }
-  // Ask for notification permission the first time the user starts the timer
   await requestNotificationPermission();
   swRunning = true;
+  swStartEpoch = Date.now();
   document.getElementById('swStart').textContent = 'Stop';
   document.getElementById('swStart').classList.add('running');
-  swInterval = setInterval(() => {
-    swSeconds++;
-    updateSWDisplay();
-    // Fire once when the counter crosses 2:00
-    if (swSeconds === 120 && !sw2minFired) {
-      sw2minFired = true;
-      fireSWNotification();
+
+  // Schedule SW notification for however many seconds remain until 2:00
+  if (!sw2minScheduled && Notification.permission === 'granted') {
+    const remaining = Math.max(0, 120 - swBaseSeconds);
+    if (remaining > 0) {
+      sw2minScheduled = true;
+      await scheduleSWNotif(remaining * 1000);
     }
+  }
+
+  // Tick every second — only for display; time source is wall clock
+  swInterval = setInterval(() => {
+    updateSWDisplay();
   }, 1000);
 }
 function stopSW() {
+  if (swRunning) swBaseSeconds = swElapsed(); // freeze elapsed at current wall-clock value
   swRunning = false;
   document.getElementById('swStart').textContent = 'Start';
   document.getElementById('swStart').classList.remove('running');
   if (swInterval) { clearInterval(swInterval); swInterval = null; }
+  // Cancel pending SW notification since the timer is paused
+  sw2minScheduled = false;
+  cancelSWNotif();
 }
-function resetSW() { stopSW(); swSeconds = 0; sw2minFired = false; updateSWDisplay(); }
+function resetSW() {
+  stopSW();
+  swBaseSeconds = 0;
+  sw2minScheduled = false;
+  cancelSWNotif();
+  updateSWDisplay();
+}
 
 document.getElementById('swStart').addEventListener('click', startSW);
 document.getElementById('swReset').addEventListener('click', resetSW);
