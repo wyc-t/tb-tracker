@@ -349,6 +349,7 @@ canvas { width: 100% !important; max-height: 250px; margin-bottom: .5rem; }
 .logbook-filter-row {
   display: flex; gap: .25rem; margin-bottom: .75rem;
   background: var(--bg3); border-radius: 8px; padding: 3px;
+  flex-shrink: 0;
 }
 .logbook-filter {
   flex: 1; background: none; border: none; color: var(--text2);
@@ -358,7 +359,24 @@ canvas { width: 100% !important; max-height: 250px; margin-bottom: .5rem; }
 }
 .logbook-filter.active { background: var(--accent); color: #0a0a0f; }
 
-#logbook { margin-bottom: .75rem; max-height: calc(100dvh - 320px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+/* Log view fills available screen height as a flex column */
+#viewLog {
+  display: none;
+  flex-direction: column;
+  height: calc(100dvh - var(--header-h) - var(--safe-t) - var(--tab-h) - var(--safe-b) - 1.5rem);
+}
+#viewLog.active {
+  display: flex;
+  animation: fadeUp .2s ease;
+}
+
+#logbook {
+  flex: 1;
+  min-height: 0; /* essential: allows flex child to shrink below content size */
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  margin-bottom: 0;
+}
 
 .lb-entry {
   background: var(--surface); border: 1px solid var(--border);
@@ -379,8 +397,11 @@ canvas { width: 100% !important; max-height: 250px; margin-bottom: .5rem; }
 .lb-entry .lb-notes { font-size: .75rem; color: var(--text2); margin-top: .2rem; font-style: italic; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 
 .log-grid-bottom {
-  position: sticky; bottom: 0; padding-top: .5rem; padding-bottom: .25rem;
+  flex-shrink: 0;
+  padding-top: .5rem;
+  padding-bottom: .25rem;
   background: var(--bg);
+  border-top: 1px solid var(--border);
 }
 .log-grid-bottom .log-tile { padding: .8rem .5rem; }
 .log-grid-bottom .log-icon { font-size: 1.4rem; }
