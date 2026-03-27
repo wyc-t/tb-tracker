@@ -1,13 +1,15 @@
 # TB Tracker
 
-A minimal, offline-first Progressive Web App for logging and tracking [Tactical Barbell](https://www.tacticalbarbell.com) strength and conditioning sessions. No account, no server, no ads — all data lives on your device.
+A minimal, offline-first Progressive Web App for logging and tracking [Tactical Barbell](https://www.tacticalbarbell.com) strength sessions and user-defined running programs. All data are stored locally. 
+
+The tracker is created with Claude on 27 Mar 2026.
 
 ---
 
 ## Features
 
 ### Strength
-- Supports all four TB templates: **Operator**, **Zulu**, **Fighter**, and **Mass**
+- Supports four TB templates: **Operator**, **Zulu**, **Fighter**, and **Mass**
 - Auto-fills sets, reps, and load from your 1RM and selected week/day
 - Optional 90% Training Max mode
 - Per-session day exercise customisation
@@ -56,12 +58,6 @@ TB Tracker is a PWA — no app store required.
 Once installed, the app works fully offline.
 
 ---
-
-## Rest Timer Notification
-
-When the stopwatch is started, the app requests notification permission and schedules a lock-screen alert at exactly **2:00**. The notification is fired by the Service Worker so it delivers even when the screen is off or you have switched to another app.
-
-The stopwatch display uses wall-clock elapsed time, so the counter stays accurate regardless of background throttling.
 
 **Platform notes:**
 - **Android (installed PWA, Chrome):** fully supported
