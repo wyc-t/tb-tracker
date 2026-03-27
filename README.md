@@ -8,7 +8,7 @@ The tracker is created with Claude on 27 Mar 2026.
 
 ## Features
 
-### Strength
+### Strength Program
 - Supports four TB templates: **Operator**, **Zulu**, **Fighter**, and **Mass**
 - Auto-fills sets, reps, and load from your 1RM and selected week/day
 - Optional 90% Training Max mode
@@ -16,7 +16,7 @@ The tracker is created with Claude on 27 Mar 2026.
 - Plate calculator with per-side breakdown
 - Floating stopwatch with rest timer
 
-### Running
+### Running Program
 - **General mode** — log distance, duration, and average HR
 - **Program mode** — structured interval logging with set groups, lap time or total duration, rest periods, and auto-calculated pace and total work time
   - Distances ≥ 400 m: enter a 400 m lap time, pace is extrapolated
